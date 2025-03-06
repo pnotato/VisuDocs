@@ -8,11 +8,20 @@ export const LANGUAGE_VERSIONS = {
 }
 
 export const CODE_SNIPPETS = {
-    javascript: `\nfunction greet(name) {\n\tconsole.log("Hello, " + name + "!");\n}\n\ngreet("Alex");\n`,
-    typescript: `\ntype Params = {\n\tname: string;\n}\n\nfunction greet(data: Params) {\n\tconsole.log("Hello, " + data.name + "!");\n}\n\ngreet({ name: "Alex" });\n`,
-    python: `\ndef greet(name):\n\tprint("Hello, " + name + "!")\n\ngreet("Alex")\n`,
-    java: `\npublic class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello World");\n\t}\n}\n`,
+    javascript: `function foo() {\n\tconsole.log("Hello, world!");\n}\n\nfoo();\n`,
+    typescript: `function foo() {\n\tconsole.log("Hello, world!");\n}\n\nfoo();\n`,
+    python: `def foo():\n\tprint("Hello, world!")\n\nfoo()\n`,
+    java: `public class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello world!");\n\t}\n}\n`,
     csharp:
-      'using System;\n\nnamespace HelloWorld\n{\n\tclass Hello { \n\t\tstatic void Main(string[] args) {\n\t\t\tConsole.WriteLine("Hello World in C#");\n\t\t}\n\t}\n}\n',
-    php: "<?php\n\n$name = 'Alex';\necho $name;\n",
+      'using System;\n\nnamespace HelloWorld\n{\n\tclass Hello { \n\t\tstatic void Main(string[] args) {\n\t\t\tConsole.WriteLine("Hello world!");\n\t\t}\n\t}\n}\n',
+    php: "<?php\n\n$str = 'Hello, world!';\necho $str;\n",
   };
+
+export const FILE_EXTENSIONS = {
+  javascript: "file.js",
+  typescript: "file.ts",
+  python: "file.py",
+  java: "file.java",
+  csharp: "file.cs",
+  php: "file.php",
+}

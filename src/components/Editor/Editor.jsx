@@ -2,6 +2,7 @@ import { Editor } from "@monaco-editor/react";
 import { useState, useRef } from "react";
 import Selector from "./Selector.jsx";
 import { CODE_SNIPPETS } from "../../constants.js";
+import { FILE_EXTENSIONS } from "../../constants.js";
 import './Editor.css'
 import Button from "./Button.jsx";
 import { executeCode } from "../api.js";
@@ -13,6 +14,7 @@ const CodeEditor = () => {
     const [language, setLanguage] = useState('javascript');
     const [isLoading, setIsLoading] = useState(false);
     const [output, setOutput] = useState(null);
+    const [error, setError] = useState(false)
 
     const onMount = (editor) => {
         editorRef.current = editor;
@@ -33,11 +35,40 @@ const CodeEditor = () => {
             setIsLoading(true)
             const {run: result} = await executeCode(language, sourceCode);
             setOutput(result.output)
+            if (result.stderr) {
+                setError(true);
+            }
         } catch (error) {
             console.log(error)
         } finally {
             setIsLoading(false); // used for loading spinner
         }
+    }
+
+    const downloadScript = (content, fileType) => {
+        const filename = fileType || "file.txt";
+        const mimeTypes = {
+          js: "text/javascript",
+          ts: "application/typescript",
+          py: "text/x-python",
+          java: "text/x-java-source",
+          cs: "text/plain", // No official MIME for C#
+          php: "application/x-httpd-php",
+        };
+        const extension = filename.split(".").pop();
+        const mimeType = mimeTypes[extension] || "text/plain"; 
+      
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+      
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     return (
@@ -47,7 +78,7 @@ const CodeEditor = () => {
                     <div className={'selector-options'}>
                     <Selector language={language} onSelect={onSelect} />
                     <Button Icon={<LuSettings />} onClick={''}/>
-                    <Button Icon={<LuDownload />} onClick={''}/>
+                    <Button Icon={<LuDownload />} onClick={() => downloadScript(value, FILE_EXTENSIONS[language])}/>
                     </div>
                     
                     
@@ -56,7 +87,7 @@ const CodeEditor = () => {
                 <Editor 
                     theme="vs-dark"
                     language={language} 
-                    defaultValue="// some comment" 
+                    defaultValue="// Code goes here!" 
                     onMount={onMount}
                     value={value}
                     onChange={(value) => setValue(value)}
@@ -68,12 +99,14 @@ const CodeEditor = () => {
             <div className={'code-output'}>
                 <div className="code-chat">
                     <div className={'code-chat-options'}>
-                    <Button Label="Share" onClick={runCode}/>
-                    <Button Label="Sign In" onClick={runCode}/>
+                        <Button Label="Share" onClick={runCode}/>
+                        <Button Label="Sign In" onClick={runCode}/>
                     </div>
                 </div>
                 <div className={'code-output-box'}>
-                    <a className={'code-output-text'}>{output ? output : 'Click "Run Code" to see the output here.'}</a>
+                    <a style={{color: error ? 'red' : output ? 'white' : 'grey'}} 
+                    className={'code-output-text'}>
+                        {error ? 'Error: ' + output : output ? output : 'Click "Run Code" to see the output here.'}</a>
                 </div>
             </div>
             
