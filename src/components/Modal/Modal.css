@@ -1,0 +1,29 @@
+.modal-menu {
+    background-color: #201c1c;
+}
+
+.test1 {
+    max-width: 100%;
+}
+
+.modal-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-text {
+    font-size: 1.5rem;
+}
+
+.modal-editor-settings {
+    display: grid;
+    grid-template-columns: auto 1fr; 
+    gap: 20px; 
+    align-items: center; 
+}
+
+.modal-editor-settings-input {
+    background-color: black;
+    color: white;
+}

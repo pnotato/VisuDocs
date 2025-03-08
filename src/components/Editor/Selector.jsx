@@ -1,7 +1,7 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { LANGUAGE_VERSIONS } from '../../constants.js'
-import Button from './Button.jsx'
+import Button from '../Button/Button.jsx'
 
 const EditorLanguages = Object.entries(LANGUAGE_VERSIONS)
 

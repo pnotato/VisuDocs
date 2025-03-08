@@ -1,0 +1,10 @@
+/* button */
+
+.button {
+    height: 100%;
+    background-color: #1B063E;
+}
+
+.button:hover {
+    background-color: #42048A;
+}
