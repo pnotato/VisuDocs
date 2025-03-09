@@ -5,8 +5,7 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    approvedUsersId: [String],
-    name: {
+    title: {
         type: String,
         default: 'New Project'
     },
@@ -21,7 +20,8 @@ const projectSchema = new mongoose.Schema({
     lastupdated: {
         type: Date,
         default: () => Date.now()
-    }
+    },
+    // approvedUsersId: [String],
 });
 
 export default mongoose.model("Project", projectSchema);

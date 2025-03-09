@@ -63,7 +63,7 @@ const CodeEditor = ({ roomCode }) => {
             if (result.signal == "SIGKILL") {
                 throw "SIGKILL"
                 // Generally this occurs if your code takes too long, i.e long for loops
-                // In which the piston API kills the process.
+                // In which the piston API just kills the process.
             }
         } catch (error) {
             console.log(error)

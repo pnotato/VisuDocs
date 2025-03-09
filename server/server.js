@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
-import 'dotenv/config'
-import path from 'path';
 import express from 'express';
+import authRoutes from "../database/Routes/auth.js";
+import cookieParser from 'cookie-parser';
 import http from 'http';
+import 'dotenv/config'
 import { Server as SocketIOServer } from "socket.io";
 
 const app = express();
@@ -44,10 +45,16 @@ async function websockets() {
 
 
 // Express
-
 app.get('/', (req, res) => {
     res.send('Hello, world!');
 });
+
+app.use(cookieParser())
+app.use(express.json()) 
+app.use("/api/auth", authRoutes)
+// app.use("/api/projects", projectRoutes)
+// app.use("/api/users", userRoutes)
+
 
 server.listen(3000, async () => {
     await connect()
