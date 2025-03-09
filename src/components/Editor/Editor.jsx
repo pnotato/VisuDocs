@@ -1,13 +1,19 @@
 import { Editor } from "@monaco-editor/react";
 import { useState, useRef } from "react";
-import Selector from "./Selector.jsx";
-import { CODE_SNIPPETS } from "../../constants.js";
-import { FILE_EXTENSIONS } from "../../constants.js";
+import { CODE_SNIPPETS, FILE_EXTENSIONS } from "../../constants.js";
+import { executeCode } from "../api.js";
+
+// Stylizing
 import './Editor.css'
 import Button from "../Button/Button.jsx";
-import { executeCode } from "../api.js";
-import { LuSettings, LuDownload } from "react-icons/lu";
+import Selector from "./Selector.jsx";
 import Modal from "../Modal/Modal.jsx";
+import { LuSettings, LuDownload } from "react-icons/lu";
+
+// Socketing
+import { io } from "socket.io-client";
+
+const socket = io("ws://localhost:3000")
 
 const CodeEditor = () => {
     const editorRef = useRef();
@@ -30,6 +36,14 @@ const CodeEditor = () => {
             CODE_SNIPPETS[language]
         )
     }
+
+    const onEditorUpdate = (value) => {
+        console.log(value);
+        socket.emit('editor-update', value)
+    }
+    socket.on('editor-update-return', value => {
+        setValue(value);
+    });
 
     const runCode = async () => {
         const sourceCode = editorRef.current.getValue();
@@ -106,7 +120,10 @@ const CodeEditor = () => {
                     defaultValue="// Code goes here!"
                     onMount={onMount}
                     value={value}
-                    onChange={(value) => setValue(value)}
+                    onChange={(value) => {
+                        // setValue(value);
+                        onEditorUpdate(value);
+                    }}
                     options={{
                         fontSize: fontSize
                     }}
