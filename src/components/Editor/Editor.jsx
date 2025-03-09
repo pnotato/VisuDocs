@@ -40,7 +40,7 @@ const CodeEditor = ({ roomCode }) => {
     }
 
     const onEditorUpdate = (value) => {
-        console.log(value);
+        // console.log(value);
         socket.emit('editor-update', value)
     }
     socket.on('editor-update-return', value => {
