@@ -7,7 +7,8 @@ import { executeCode } from "../api.js";
 import './Editor.css'
 import Button from "../Button/Button.jsx";
 import Selector from "./Selector.jsx";
-import Modal from "../Modal/Modal.jsx";
+import EditorSettingsModal from "../Modal/EditorSettingsModal.jsx";
+import ShareModal from "../Modal/ShareModal.jsx";
 import { LuSettings, LuDownload } from "react-icons/lu";
 
 // Socketing
@@ -15,14 +16,15 @@ import { io } from "socket.io-client";
 
 const socket = io("ws://localhost:3000")
 
-const CodeEditor = () => {
+const CodeEditor = ({ roomCode }) => {
     const editorRef = useRef();
     const [value, setValue] = useState('');
     const [language, setLanguage] = useState('javascript');
     const [isLoading, setIsLoading] = useState(false);
     const [output, setOutput] = useState(null);
     const [error, setError] = useState(false);
-    const [ModalState, setModalState] = useState(false);
+    const [EditorSettings, EditorSettingsOpen] = useState(false);
+    const [ShareMenu, ShareMenuOpen] = useState(false);
     const [fontSize, setFontSize] = useState(14);
 
     const onMount = (editor) => {
@@ -80,7 +82,7 @@ const CodeEditor = () => {
             ts: "application/typescript",
             py: "text/x-python",
             java: "text/x-java-source",
-            cs: "text/plain", // No official MIME for C#
+            cs: "text/plain",
             php: "application/x-httpd-php",
         };
         const extension = filename.split(".").pop();
@@ -100,20 +102,21 @@ const CodeEditor = () => {
     }
 
     return (
-        <div className={'interface'}>
-            <div className={'code-editor'}>
-                <div className={'code-editor-options'}>
-                    <div className={'selector-options'}>
+        <div className='interface'>
+            <div className='code-editor'>
+                <div className='code-editor-options'>
+                    <div className='selector-options'>
                         <Selector language={language} onSelect={onSelect} />
-                        <Button Icon={<LuSettings />} onClick={() => setModalState(true)} />
+                        <Button Icon={<LuSettings />} onClick={() => EditorSettingsOpen(true)} />
                         <Button Icon={<LuDownload />} onClick={() => downloadScript(value, FILE_EXTENSIONS[language])} />
                     </div>
 
 
                     <Button Label="Run Code" onClick={runCode} />
                 </div>
-                <Modal open={ModalState} setOpen={setModalState} 
+                <EditorSettingsModal open={EditorSettings} setOpen={EditorSettingsOpen} 
                     fontSize={fontSize} setFontSize={setFontSize}/>
+                <ShareModal open={ShareMenu} setOpen={ShareMenuOpen}/>
                 <Editor
                     theme="vs-dark"
                     language={language}
@@ -132,7 +135,7 @@ const CodeEditor = () => {
             <div className={'code-output'}>
                 <div className="code-chat">
                     <div className={'code-chat-options'}>
-                        <Button Label="Share" onClick={runCode} />
+                        <Button Label="Share" onClick={() => ShareMenuOpen(true)}/>
                         <Button Label="Sign In" onClick={runCode} />
                     </div>
                 </div>

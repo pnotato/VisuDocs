@@ -7,12 +7,10 @@ const io = new Server(3000, {
 });
 
 io.on("connection", (socket) => {
-    socket.emit("hello, world");
-
-    console.log(socket.id)
+    // console.log(`User joined with ID: ${socket.id}`)
 
     socket.on('editor-update', value => {
-        console.log(value);
+        // console.log(value);
         io.emit('editor-update-return', value)
     })
 

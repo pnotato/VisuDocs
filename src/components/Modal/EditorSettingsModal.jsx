@@ -1,10 +1,7 @@
 import './Modal.css'
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
-import Button from '../Button/Button';
-import { IoCloseSharp } from "react-icons/io5";
 
-export default function Example({ open, setOpen, fontSize, setFontSize }) {
+export default function EditorSettingsModal({ open, setOpen, fontSize, setFontSize }) {
 
   return (
     <Dialog open={open} onClose={setOpen} className="relative z-10">

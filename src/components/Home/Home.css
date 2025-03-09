@@ -1,0 +1,36 @@
+.interface {
+    width: 100%;
+    height: calc(100vh - 4rem);
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+}
+
+.user-projects-list {
+    width: calc(60% - 1rem);
+    background-color: #201c1c;
+    border-radius: 20px;
+    overflow: hidden;
+    padding: 20px;
+    height: 100%;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+.user-info {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: calc(40% - 1rem);
+    gap: 2rem;
+    background-color: red;
+}
+
+.user-options {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 20px;
+    height: 5vh;
+    background-color: black;
+}
