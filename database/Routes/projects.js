@@ -1,6 +1,6 @@
 import express from 'express';
-import { createProject, deleteProject, renameProject, getProject } from '../Controllers/projects';
-import { verifyToken } from '../verifyToken';
+import { createProject, deleteProject, renameProject, getProject } from '../Controllers/projects.js';
+import { verifyToken } from '../verifyToken.js';
 
 const router = express.Router()
 
@@ -11,4 +11,4 @@ router.get("/", getProject)
 
 // still might need get all projects by user.
 
-export default router
+export default router;

@@ -1,6 +1,5 @@
-import User from "../Models/User";
-import Project from "../Models/Project";
-import { throwError } from "../error";
+import Project from "../Models/Project.js";
+import { throwError } from "../error.js";
 
 // create a project
 export const createProject = async (req, res, next) => {

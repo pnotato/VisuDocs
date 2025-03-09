@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import express from 'express';
 import authRoutes from "../database/Routes/auth.js";
+import projectRoutes from "../database/Routes/projects.js";
+import userRoutes from "../database/Routes/users.js";
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import 'dotenv/config'
@@ -52,8 +54,8 @@ app.get('/', (req, res) => {
 app.use(cookieParser())
 app.use(express.json()) 
 app.use("/api/auth", authRoutes)
-// app.use("/api/projects", projectRoutes)
-// app.use("/api/users", userRoutes)
+app.use("/api/projects", projectRoutes)
+app.use("/api/users", userRoutes)
 
 
 server.listen(3000, async () => {

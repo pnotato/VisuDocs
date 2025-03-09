@@ -1,8 +1,11 @@
-import mongoose from "mongoose";
-import User from "../Models/User";
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import express from 'express'
+import { getUser, deleteUser, updateUser } from '../Controllers/users.js'
+import { verifyToken } from '../verifyToken.js'
 
-// update user
+const router = express.Router()
 
-// get a user
+router.get("/find/:id", getUser)
+router.delete("/:id", verifyToken, deleteUser)
+router.put("/:id", verifyToken, updateUser)
+
+export default router;
