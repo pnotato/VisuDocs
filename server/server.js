@@ -1,4 +1,7 @@
 import { Server } from "socket.io";
+import express from 'express';
+
+// Socketing
 
 const io = new Server(3000, {
     cors: {
@@ -16,5 +19,15 @@ io.on("connection", (socket) => {
 
 })
 
+// Express
 
+const app = express();
+const server = http.createServer(app)
 
+app.get('/', (req, res) => {
+    res.send('Hello, world!');
+});
+
+server.listen(3000, () => {
+    console.log('Server is running on port 3000');
+  });
