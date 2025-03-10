@@ -8,4 +8,6 @@ router.get("/find/:id", getUser)
 router.delete("/:id", verifyToken, deleteUser)
 router.put("/:id", verifyToken, updateUser)
 
+// need get all projects as well.
+
 export default router;

@@ -14,10 +14,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    }, 
-    projects: {
-        type:  [String]
-    }   
+    }
 });
 
 export default mongoose.model("User", userSchema);

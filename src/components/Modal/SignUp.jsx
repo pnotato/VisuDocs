@@ -5,6 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 
 export default function SignUpModal({ open, setOpen=()=>{}, overlay=true }) {
+  
   const navigate = useNavigate();
 
   const handleRedirect = () => {

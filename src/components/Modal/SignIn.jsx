@@ -1,14 +1,31 @@
 import { useNavigate } from 'react-router-dom';
 import './Modal.css'
 import Button from '../Button/Button.jsx'
+import axios from 'axios';
 import { FcGoogle } from "react-icons/fc";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
+import { useState } from 'react';
 
 export default function SignInModal({ open, setOpen=()=>{}, overlay=true }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+
   const navigate = useNavigate();
 
   const handleRedirect = () => {
     navigate('/signup')
+  }
+
+  const handleLogin = async (e) => {
+    e.preventDefault(); // prevents page from reloading on blank sign ins.
+    try {
+      const res = await axios.post("/api/auth/signin", {email, password})
+      console.log(res.data);
+    }catch(error) {
+
+    }
+
   }
 
   return (
@@ -45,16 +62,16 @@ export default function SignInModal({ open, setOpen=()=>{}, overlay=true }) {
                     <br></br>
                     <form className='modal-editor-settings'>
                         <label>Email</label>
-                        <input type='text' className={'modal-editor-settings-input'} />
+                        <input type='text' className={'modal-editor-settings-input'} onChange={e=>setEmail(e.target.value)}/>
                         <label>Password</label>
-                        <input type='password' className={'modal-editor-settings-input'} />
+                        <input type='password' className={'modal-editor-settings-input'} onChange={e=>setPassword(e.target.value)}/>
                     </form>
                     
                     <div className='sign-in-form-buttons'>
                     <Button Label='Sign Up' onClick={handleRedirect}/>
                       <div className='sign-in-buttons'>
                       <Button Icon={<FcGoogle />}/>
-                      <Button Label='Sign In'/>
+                      <Button Label='Sign In' onClick={handleLogin}/>
                       </div>
                     
                     

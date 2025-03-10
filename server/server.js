@@ -6,8 +6,10 @@ import userRoutes from "../database/Routes/users.js";
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import 'dotenv/config'
+import dotenv from 'dotenv'
 import { Server as SocketIOServer } from "socket.io";
 
+dotenv.config()
 const app = express();
 const server = http.createServer(app);
 console.log("\n\x1b[32m[server.js] Express server initialized :)\x1b[0m")

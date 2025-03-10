@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { throwError } from '../error.js'
 import User from "../Models/User.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -19,12 +20,24 @@ export const signUp = async (req, res, next) => {
 }
 
 // sign in
-export const signIn = async (req, res, next) => {
+export const signIn = async (req, res, next)=>{ 
     try {
-        const user = await User.findOne({name: req.body.name});
-        if (!user) return next("No user found") // createError(404, "User not found")
-    } catch(error) {
-        next(error)
+        const user = await User.findOne({email:req.body.email});
+        if (!user) return next(throwError(404, "User Not Found"));
+
+        const isCorrect = await bcrypt.compare(req.body.password, user.password);
+        if (!isCorrect) return next(throwError(400, "Invalid Credentials"))
+
+        const token = jwt.sign({id: user._id}, process.env.JWT) 
+        const {password, ...others} = user._doc; 
+
+        res.cookie("access_token", token, {
+            httpOnly:true
+        })
+        .status(200)
+        .json(others);
+    }catch(err){
+        next(err)
     }
 }
 
