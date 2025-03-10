@@ -1,0 +1,11 @@
+.signin-interface {
+    display: grid;
+    place-content: center;
+}
+
+/* .signIn-window {
+    background-color: red;
+    height: 70vh;
+    width: 50vw;
+    border-radius: 20px;
+} */

@@ -7,8 +7,9 @@ import { executeCode } from "../api.js";
 import './Editor.css'
 import Button from "../Button/Button.jsx";
 import Selector from "./Selector.jsx";
-import EditorSettingsModal from "../Modal/EditorSettingsModal.jsx";
-import ShareModal from "../Modal/ShareModal.jsx";
+import EditorSettingsModal from "../Modal/EditorSettings.jsx";
+import ShareModal from "../Modal/Share.jsx";
+import SignInModal from '../Modal/SignIn.jsx'
 import { LuSettings, LuDownload } from "react-icons/lu";
 
 // Socketing
@@ -25,6 +26,7 @@ const CodeEditor = ({ roomCode }) => {
     const [error, setError] = useState(false);
     const [EditorSettings, EditorSettingsOpen] = useState(false);
     const [ShareMenu, ShareMenuOpen] = useState(false);
+    const [SignInMenu, SignInMenuOpen] = useState(false);
     const [fontSize, setFontSize] = useState(14);
 
     const onMount = (editor) => {
@@ -117,6 +119,7 @@ const CodeEditor = ({ roomCode }) => {
                 <EditorSettingsModal open={EditorSettings} setOpen={EditorSettingsOpen} 
                     fontSize={fontSize} setFontSize={setFontSize}/>
                 <ShareModal open={ShareMenu} setOpen={ShareMenuOpen}/>
+                <SignInModal open={SignInMenu} setOpen={SignInMenuOpen} />
                 <Editor
                     theme="vs-dark"
                     language={language}
@@ -136,7 +139,7 @@ const CodeEditor = ({ roomCode }) => {
                 <div className="code-chat">
                     <div className={'code-chat-options'}>
                         <Button Label="Share" onClick={() => ShareMenuOpen(true)}/>
-                        <Button Label="Sign In" onClick={runCode} />
+                        <Button Label="Sign In" onClick={() => SignInMenuOpen(true)} />
                     </div>
                 </div>
                 <div className={'code-output-box'}>

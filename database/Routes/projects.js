@@ -7,7 +7,7 @@ const router = express.Router()
 router.post("/", verifyToken, createProject)
 router.delete("/:id", verifyToken, deleteProject)
 router.put("/:id", renameProject)
-router.get("/", getProject)
+router.get("/:id", getProject)
 
 // still might need get all projects by user.
 

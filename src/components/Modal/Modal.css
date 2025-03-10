@@ -21,9 +21,27 @@
     grid-template-columns: auto 1fr; 
     gap: 20px; 
     align-items: center; 
+
 }
 
 .modal-editor-settings-input {
     background-color: black;
     color: white;
+    width: 95%;
+}
+
+/* Sign in Modals */
+
+.sign-in-buttons {
+    display: flex;
+    justify-content: right;
+    gap: 10px;
+}
+
+.sign-in-form-buttons {
+    display: flex;
+    margin-right: 20px;
+    margin-top: 40px;
+    margin-bottom: 10px;
+    justify-content: space-between;
 }
