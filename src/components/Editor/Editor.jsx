@@ -2,6 +2,7 @@ import { Editor } from "@monaco-editor/react";
 import { useState, useRef } from "react";
 import { CODE_SNIPPETS, FILE_EXTENSIONS } from "../../constants.js";
 import { executeCode } from "../api.js";
+import { useSelector } from "react-redux";
 
 // Stylizing
 import './Editor.css'
@@ -28,6 +29,8 @@ const CodeEditor = ({ roomCode }) => {
     const [ShareMenu, ShareMenuOpen] = useState(false);
     const [SignInMenu, SignInMenuOpen] = useState(false);
     const [fontSize, setFontSize] = useState(14);
+    
+    const currentUser = useSelector(state=>state.user.currentUser) // redux to get user from storage
 
     const onMount = (editor) => {
         editorRef.current = editor;
@@ -139,7 +142,7 @@ const CodeEditor = ({ roomCode }) => {
                 <div className="code-chat">
                     <div className={'code-chat-options'}>
                         <Button Label="Share" onClick={() => ShareMenuOpen(true)}/>
-                        <Button Label="Sign In" onClick={() => SignInMenuOpen(true)} />
+                        <Button Label={currentUser ? currentUser.name : 'Sign In'} onClick={() => SignInMenuOpen(true)} />
                     </div>
                 </div>
                 <div className={'code-output-box'}>

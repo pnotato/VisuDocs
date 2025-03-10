@@ -5,6 +5,8 @@ import axios from 'axios';
 import { FcGoogle } from "react-icons/fc";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { loginStart, loginSuccess, loginFailure } from '../../redux/userSlice.js';
 
 export default function SignInModal({ open, setOpen=()=>{}, overlay=true }) {
   const [email, setEmail] = useState('');
@@ -13,17 +15,21 @@ export default function SignInModal({ open, setOpen=()=>{}, overlay=true }) {
 
   const navigate = useNavigate();
 
+  const dispatch = useDispatch();
+
   const handleRedirect = () => {
     navigate('/signup')
   }
 
   const handleLogin = async (e) => {
     e.preventDefault(); // prevents page from reloading on blank sign ins.
+    dispatch(loginStart())
     try {
       const res = await axios.post("/api/auth/signin", {email, password})
       console.log(res.data);
+      dispatch(loginSuccess(res.data))
     }catch(error) {
-
+      dispatch(loginFailure());
     }
 
   }
