@@ -6,7 +6,7 @@ const initialState = {
     error: false,
 }
 // still initialized as user for now, change later.
-export const userSlice = createSlice({
+export const projectSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
@@ -31,4 +31,4 @@ export const userSlice = createSlice({
 
 export const {loginStart, loginSuccess, loginFailure, logout} = projectSlice.actions
 
-export default userSlice.reducer;
+export default projectSlice.reducer;
