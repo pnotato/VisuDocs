@@ -1,12 +1,12 @@
 import { LANGUAGE_VERSIONS } from "../constants"
 import axios from "axios";
 
-const API = axios.create({
+const runAPI = axios.create({
     baseURL:  "https://emkc.org/api/v2/piston"
 })
 
 export const executeCode = async(language, sourceCode) => {
-    const response = await  API.post("/execute", {
+    const response = await runAPI.post("/execute", {
         "language": language,
         "version": LANGUAGE_VERSIONS[language],
         "files": [

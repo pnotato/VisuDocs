@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import './Modal.css'
 import Button from '../Button/Button.jsx'
-import axios from 'axios';
+import { axiosp as axios } from '../../../server/proxy.js'; // import axios from 'axios'
 import { FcGoogle } from "react-icons/fc";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { useState } from 'react';
