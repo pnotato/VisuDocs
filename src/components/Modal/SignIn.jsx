@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import './Modal.css'
 import Button from '../Button/Button.jsx'
-import { axiosp as axios } from '../../../server/proxy.js'; // import axios from 'axios'
+import { axiosp as axios } from '../../../proxy.js'; // import axios from 'axios'
 import { FcGoogle } from "react-icons/fc";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginStart, loginSuccess, loginFailure } from '../../redux/userSlice.js';
+import { auth, provider } from '../../../firebase.js';
+import { signInWithPopup } from 'firebase/auth';
 
 export default function SignInModal({ open, setOpen=()=>{}, overlay=true }) {
   const [email, setEmail] = useState('');
@@ -31,8 +33,22 @@ export default function SignInModal({ open, setOpen=()=>{}, overlay=true }) {
     }catch(error) {
       dispatch(loginFailure());
     }
-
   }
+
+  const handleGoogleLogin = async () => {
+    dispatch(loginStart())
+    signInWithPopup(auth, provider).then((result) => {
+      axios.post("/api/auth/google", {
+        name: result.user.displayName,
+        email: result.user.email,
+        img: result.user.photoURL
+      }).then((res)=>{
+        dispatch(loginSuccess(res.data))
+      })
+    }).catch((error) => {
+      dispatch(loginFailure());
+    });
+  };
 
   return (
     <Dialog open={open} onClose={setOpen} className="relative z-10">
@@ -76,7 +92,7 @@ export default function SignInModal({ open, setOpen=()=>{}, overlay=true }) {
                     <div className='sign-in-form-buttons'>
                     <Button Label='Sign Up' onClick={handleRedirect}/>
                       <div className='sign-in-buttons'>
-                      <Button Icon={<FcGoogle />}/>
+                      <Button Icon={<FcGoogle />} onClick={handleGoogleLogin}/>
                       <Button Label='Sign In' onClick={handleLogin}/>
                       </div>
                     

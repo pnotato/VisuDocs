@@ -42,3 +42,30 @@ export const signIn = async (req, res, next)=>{
 }
 
 // sign in google auth
+export const googleAuth = async (req, res, next) => {
+    try {
+        const user = await User.findOne({email: req.body.email});
+        if (user) { // applies if there's already an account that exists.
+            const token = jwt.sign({id: user._id}, process.env.JWT);
+            res.cookie("access_token", token, {
+                httpOnly:true
+            })
+            .status(200)
+            .json(user._doc);
+        } else {
+            const newUser = new User({
+                ...req.body,
+                fromGoogle: true
+            })
+            const savedUser = await newUser.save()
+            const token = jwt.sign({id: savedUser._id}, process.env.JWT);
+            res.cookie("access_token", token, {
+                httpOnly:true
+            })
+            .status(200)
+            .json(savedUser._doc);
+        }
+    } catch {
+        next(err);
+    }
+}

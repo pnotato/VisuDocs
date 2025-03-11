@@ -1,15 +1,14 @@
 import mongoose from 'mongoose';
 import express from 'express';
-import authRoutes from "../database/Routes/auth.js";
-import projectRoutes from "../database/Routes/projects.js";
-import userRoutes from "../database/Routes/users.js";
+import authRoutes from "./database/Routes/auth.js";
+import projectRoutes from "./database/Routes/projects.js";
+import userRoutes from "./database/Routes/users.js";
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import 'dotenv/config'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import { Server as SocketIOServer } from "socket.io";
-
 
 dotenv.config()
 const app = express();
