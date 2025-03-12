@@ -11,6 +11,7 @@ import Selector from "./Selector.jsx";
 import EditorSettingsModal from "../Modal/EditorSettings.jsx";
 import ShareModal from "../Modal/Share.jsx";
 import SignInModal from '../Modal/SignIn.jsx'
+import SignOutModal from "../Modal/SignOut.jsx";
 import { LuSettings, LuDownload } from "react-icons/lu";
 
 // Socketing
@@ -28,6 +29,7 @@ const CodeEditor = ({ roomCode }) => {
     const [EditorSettings, EditorSettingsOpen] = useState(false);
     const [ShareMenu, ShareMenuOpen] = useState(false);
     const [SignInMenu, SignInMenuOpen] = useState(false);
+    const [SignOutMenu, SignOutMenuOpen] = useState(false);
     const [fontSize, setFontSize] = useState(14);
     
     const currentUser = useSelector(state=>state.user.currentUser) // redux to get user from storage
@@ -123,6 +125,7 @@ const CodeEditor = ({ roomCode }) => {
                     fontSize={fontSize} setFontSize={setFontSize}/>
                 <ShareModal open={ShareMenu} setOpen={ShareMenuOpen}/>
                 <SignInModal open={SignInMenu} setOpen={SignInMenuOpen} />
+                <SignOutModal open={SignOutMenu} setOpen={SignOutMenuOpen} />
                 <Editor
                     theme="vs-dark"
                     language={language}
@@ -142,7 +145,7 @@ const CodeEditor = ({ roomCode }) => {
                 <div className="code-chat">
                     <div className={'code-chat-options'}>
                         <Button Label="Share" onClick={() => ShareMenuOpen(true)}/>
-                        <Button Label={currentUser ? currentUser.name : 'Sign In'} onClick={() => SignInMenuOpen(true)} />
+                        <Button Icon={currentUser ? <img style={{ height: '3vh', borderRadius: '20px' }} src={currentUser.img} /> : 'Sign In'} onClick={currentUser ? () => SignOutMenuOpen(true) : () => SignInMenuOpen(true)} />
                     </div>
                 </div>
                 <div className={'code-output-box'}>
@@ -150,6 +153,7 @@ const CodeEditor = ({ roomCode }) => {
                         className={'code-output-text'}>
                         {error ? 'Error: ' + output : output ? output : 'Click "Run Code" to see the output here.'}</a>
                 </div>
+                
             </div>
 
         </div>

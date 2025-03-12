@@ -6,37 +6,38 @@ import { FcGoogle } from "react-icons/fc";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { loginStart, loginSuccess, loginFailure } from '../../redux/userSlice.js';
+import { logout } from '../../redux/userSlice.js';
 import { auth, provider } from '../../../firebase.js';
 import { signInWithPopup } from 'firebase/auth';
 
-const blank = () => {}
-
-export default function SignInModal({ open, setOpen=blank, overlay=true }) {
+export default function SignOutModal({ open, setOpen=()=>{}, overlay=true }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+
   const navigate = useNavigate();
+
   const dispatch = useDispatch();
 
   const handleRedirect = () => {
     navigate('/signup')
   }
 
-  const handleLogin = async (e) => {
-    e.preventDefault(); // prevents page from reloading on blank sign ins.
-    dispatch(loginStart())
-    try {
-      const res = await axios.post("/api/auth/signin", {email, password})
-      console.log(res.data);
-      dispatch(loginSuccess(res.data))
-      if (setOpen != blank ) {
-        setOpen(false)
-      } else {
-        navigate('/editor')
-      }
-    }catch(error) {
-      dispatch(loginFailure());
-    }
+//   const handleLogin = async (e) => {
+//     e.preventDefault(); // prevents page from reloading on blank sign ins.
+//     dispatch(loginStart())
+//     try {
+//       const res = await axios.post("/api/auth/signin", {email, password})
+//       console.log(res.data);
+//       dispatch(loginSuccess(res.data))
+//     }catch(error) {
+//       dispatch(loginFailure());
+//     }
+//   }
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    dispatch(logout())
   }
 
   const handleGoogleLogin = async () => {
@@ -74,7 +75,7 @@ export default function SignInModal({ open, setOpen=blank, overlay=true }) {
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <div className='modal-title '>
                         <DialogTitle className="modal-text text-base font-semibold text-white-900 ">
-                        Sign In
+                        Sign Out
                     </DialogTitle>
                     {overlay && <button type="button" onClick={()=>setOpen(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
                     <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -97,7 +98,7 @@ export default function SignInModal({ open, setOpen=blank, overlay=true }) {
                     <Button Label='Sign Up' onClick={handleRedirect}/>
                       <div className='sign-in-buttons'>
                       <Button Icon={<FcGoogle />} onClick={handleGoogleLogin}/>
-                      <Button Label='Sign In' onClick={handleLogin}/>
+                      <Button Label='Sign In' onClick={handleLogout}/>
                       </div>
                     
                     

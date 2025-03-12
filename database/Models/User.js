@@ -15,7 +15,9 @@ const userSchema = new mongoose.Schema({
         type: String,
     },
     img: {
-        type: String
+        type: String,
+        required: true,
+        default: 'icons/blank.png'
     },
     google: {
         type: Boolean,
