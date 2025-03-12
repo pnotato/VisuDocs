@@ -20,40 +20,14 @@ export default function SignOutModal({ open, setOpen=()=>{}, overlay=true }) {
   const dispatch = useDispatch();
 
   const handleRedirect = () => {
-    navigate('/signup')
+    navigate('/signin')
   }
-
-//   const handleLogin = async (e) => {
-//     e.preventDefault(); // prevents page from reloading on blank sign ins.
-//     dispatch(loginStart())
-//     try {
-//       const res = await axios.post("/api/auth/signin", {email, password})
-//       console.log(res.data);
-//       dispatch(loginSuccess(res.data))
-//     }catch(error) {
-//       dispatch(loginFailure());
-//     }
-//   }
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    dispatch(logout())
+    dispatch(logout());
+    setOpen(false);
   }
-
-  const handleGoogleLogin = async () => {
-    dispatch(loginStart())
-    signInWithPopup(auth, provider).then((result) => {
-      axios.post("/api/auth/google", {
-        name: result.user.displayName,
-        email: result.user.email,
-        img: result.user.photoURL
-      }).then((res)=>{
-        dispatch(loginSuccess(res.data))
-      })
-    }).catch((error) => {
-      dispatch(loginFailure());
-    });
-  };
 
   return (
     <Dialog open={open} onClose={setOpen} className="relative z-10">
@@ -75,7 +49,7 @@ export default function SignOutModal({ open, setOpen=()=>{}, overlay=true }) {
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <div className='modal-title '>
                         <DialogTitle className="modal-text text-base font-semibold text-white-900 ">
-                        Sign Out
+                        {}
                     </DialogTitle>
                     {overlay && <button type="button" onClick={()=>setOpen(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
                     <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -95,10 +69,9 @@ export default function SignOutModal({ open, setOpen=()=>{}, overlay=true }) {
                     </form>
                     
                     <div className='sign-in-form-buttons'>
-                    <Button Label='Sign Up' onClick={handleRedirect}/>
+                    <Button Label='Change Accounts' onClick={handleRedirect}/>
                       <div className='sign-in-buttons'>
-                      <Button Icon={<FcGoogle />} onClick={handleGoogleLogin}/>
-                      <Button Label='Sign In' onClick={handleLogout}/>
+                      <Button Label='Sign Out' onClick={handleLogout}/>
                       </div>
                     
                     

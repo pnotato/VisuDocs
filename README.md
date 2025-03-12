@@ -17,9 +17,10 @@ cd VisuDocs
 npm i
 ```
 
-You will need to create a ```.env``` file in the root directorywith the following variables:
+You will need to create a ```.env``` file in the root directory with the following variables:
 ```
 MONGODB_KEY=<a mongodb url>
 JWT = <any string, will be used for json web token signing>
 VITE_FIREBASE_KEY=<firebase api key>
 ```
+
