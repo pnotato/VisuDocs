@@ -10,10 +10,22 @@
     width: calc(60% - 1rem);
     background-color: #201c1c;
     border-radius: 20px;
-    overflow: hidden;
+    overflow: scroll;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    display: flex;
+    flex-direction: column;
     padding: 20px;
     height: 100%;
+    gap: 1rem;
+    
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+.user-projects-list {
+    ::-webkit-scrollbar {
+        display: none;
+        }
 }
 
 .user-info {
@@ -21,8 +33,7 @@
     display: flex;
     flex-direction: column;
     width: calc(40% - 1rem);
-    gap: 2rem;
-    background-color: red;
+    gap: 2rem
 }
 
 .user-options {
@@ -32,5 +43,28 @@
     justify-content: flex-end;
     gap: 20px;
     height: 5vh;
-    background-color: black;
+}
+
+.user-join-project {
+    background-color: #201c1c;
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 100%;
+    height: 50%;
+    overflow: auto;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+.user-new-project {
+    background-color: #201c1c;
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 100%;
+    height: 50%;
+    overflow: auto;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
 }

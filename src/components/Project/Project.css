@@ -1,0 +1,41 @@
+.project-pane {
+    background-color: black;
+    width: 100%;
+    height: 20vh;
+    border-radius: 20px;
+    flex-shrink: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.5s ease;
+}
+.project-pane:hover {
+    cursor: pointer;
+    transform: scale(1.01);
+    /* box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); */
+}
+.project-pane:active {
+    transform: scale(0.99);
+    /* box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); */
+}
+
+.project-info {
+    width: 100%;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.project-title {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.project-icon {
+    background-color: green;
+    height: calc(20vh - 40px);
+    aspect-ratio: 1/1;
+    border-radius: 10px;
+}

@@ -23,6 +23,10 @@ export default function SignOutModal({ open, setOpen=()=>{}, overlay=true }) {
     navigate('/signin')
   }
 
+  const handleRedirectHome = () => {
+    navigate('/home')
+  }
+
   const handleLogout = async (e) => {
     e.preventDefault();
     dispatch(logout());
@@ -65,6 +69,7 @@ export default function SignOutModal({ open, setOpen=()=>{}, overlay=true }) {
                     
                     <div className='sign-in-form-buttons'>
                     <Button Label='Change Accounts' onClick={handleRedirect}/>
+                    <Button Label='Projects' onClick={handleRedirectHome}/>
                       <div className='sign-in-buttons'>
                       <Button Label='Sign Out' onClick={handleLogout}/>
                       </div>

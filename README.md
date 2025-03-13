@@ -23,7 +23,7 @@ MONGODB_KEY=<a mongodb url>
 JWT = <any string, will be used for json web token signing>
 VITE_FIREBASE_KEY=<firebase api key>
 ```
-Start the frontend by running ```npm run dev``` and backend with ```node server.js```. The app should start running on [http://localhost:5173](http://localhost:5173)
+Start the frontend by running ```npm run dev``` and backend with ```node server.js```. The app should start running on [http://localhost:5173/editor](http://localhost:5173/editor)
 
 
 
