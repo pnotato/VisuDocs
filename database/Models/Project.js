@@ -21,7 +21,6 @@ const projectSchema = new mongoose.Schema({
         type: Date,
         default: () => Date.now()
     },
-    // approvedUsersId: [String],
 });
 
 export default mongoose.model("Project", projectSchema);

@@ -28,12 +28,12 @@ export default function SignInModal({ open, setOpen=blank, overlay=true }) {
     try {
       const res = await axios.post("/api/auth/signin", {email, password})
       console.log(res.data);
-      dispatch(loginSuccess(res.data))
       if (setOpen != blank ) {
-        setOpen(false)
+        await setOpen(false)
       } else {
         navigate('/editor')
       }
+      dispatch(loginSuccess(res.data))
     }catch(error) {
       dispatch(loginFailure());
     }
@@ -47,8 +47,14 @@ export default function SignInModal({ open, setOpen=blank, overlay=true }) {
         email: result.user.email,
         img: result.user.photoURL
       }).then((res)=>{
+        if (setOpen != blank ) {
+          setOpen(false)
+        } else {
+          navigate('/editor')
+        }
         dispatch(loginSuccess(res.data))
       })
+
     }).catch((error) => {
       dispatch(loginFailure());
     });

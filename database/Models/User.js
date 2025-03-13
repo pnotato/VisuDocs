@@ -19,10 +19,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: 'icons/blank.png'
     },
-    google: {
-        type: Boolean,
-        default: false
-    }
+    projects: [String],
 });
 
 export default mongoose.model("User", userSchema);
