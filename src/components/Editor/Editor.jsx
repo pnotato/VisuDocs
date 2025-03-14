@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { CODE_SNIPPETS, FILE_EXTENSIONS } from "../../constants.js";
 import { executeCode } from "../api.js";
 import { useSelector } from "react-redux";
+import { axiosp as axios } from "../../../proxy.js";
 
 // Stylizing
 import './Editor.css'
@@ -21,19 +22,7 @@ import { io } from "socket.io-client";
 const socket = io("ws://localhost:3000")
 
 const CodeEditor = ({ roomCode }) => {
-    const { id } = useParams();
 
-    useEffect(() => {
-        if (id) {
-            socket.emit('join-room', id);
-        }
-
-        return () => {
-            if (id) {
-                socket.emit('leave-room', id);
-            }
-        };
-    }, [id]);
     const editorRef = useRef();
     const [value, setValue] = useState('');
     const [language, setLanguage] = useState('javascript');
@@ -45,11 +34,42 @@ const CodeEditor = ({ roomCode }) => {
     const [SignInMenu, SignInMenuOpen] = useState(false);
     const [SignOutMenu, SignOutMenuOpen] = useState(false);
     const [fontSize, setFontSize] = useState(14);
-    
     const currentUser = useSelector(state=>state.user.currentUser) // redux to get user from storage
-
+    const [saving, setSaving] = useState(false);
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
+
+    const { id } = useParams();
+
+    useEffect(() => {
+        if (id) {
+            socket.emit('join-room', id);
+            
+            // Request the current user count in the room
+            socket.emit('get-user-count', id, (userCount) => {
+                console.log(`Users in room: ${userCount}`);
+                
+                if (userCount === 1) { // First user joins, fetch code from database
+                    
+                    axios.get(`/api/projects/${id}`)
+                        .then((res) => {
+                            if (res.data && res.data.code) {
+                                setValue(res.data.code); // Set editor value
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching project code:", error);
+                        });
+                }
+            });
+        }
+        
+        return () => {
+            if (id) {
+                socket.emit('leave-room', id);
+            }
+        };
+    }, [id]);
 
     useEffect(() => {
         // Listen for incoming chat messages
@@ -138,6 +158,23 @@ const CodeEditor = ({ roomCode }) => {
         }
     }
 
+    const saveProject = async () => {
+        if (!id) {
+            console.error("Project ID is missing.");
+            return;
+        }
+    
+        setSaving(true);
+        try {
+            const res = await axios.put(`/api/projects/${id}`, { ownerId: currentUser._id, code: value });
+            console.log("Project saved successfully:", res.data);
+        } catch (error) {
+            console.error("Error saving project:", error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const downloadScript = (content, fileType) => {
         const filename = fileType || "file.txt";
         const mimeTypes = {
@@ -172,6 +209,7 @@ const CodeEditor = ({ roomCode }) => {
                         <Selector language={language} onSelect={onSelect} />
                         <Button Icon={<LuSettings />} onClick={() => EditorSettingsOpen(true)} />
                         <Button Icon={<LuDownload />} onClick={() => downloadScript(value, FILE_EXTENSIONS[language])} />
+                        <Button Label={saving ? "Saving..." : "Save"} onClick={saveProject} />
                     </div>
 
 

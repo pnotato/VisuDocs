@@ -52,7 +52,6 @@ export default function Home() {
                 language: ProjectLang
             }, { withCredentials: true });
     
-            // Extract project ID and redirect
             if (res.data && res.data._id) {
                 navigate(`/editor/${res.data._id}`);
             }
@@ -69,13 +68,19 @@ export default function Home() {
             <div className='user-projects-list'>
                 {projects.length > 0 ? (
                     projects.map(project => (
-                        <Project
-                            key={project._id}
-                            name={project.title}
-                            author={project.ownerId}
-                            updated={new Date(project.lastupdated).toLocaleString()}
-                            language={project.language}
-                        />
+                <div 
+                    key={project._id}
+                    className="project-container"
+                    onClick={() => navigate(`/editor/${project._id}`)}
+                    style={{ cursor: 'pointer' }}
+                >
+                    <Project
+                        name={project.title}
+                        author={project.ownerId}
+                        updated={new Date(project.lastupdated).toLocaleString()}
+                        language={project.language}
+                    />
+                </div>
                     ))
                 ) : (
                     <p>No projects found.</p>

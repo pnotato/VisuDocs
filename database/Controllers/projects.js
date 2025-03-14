@@ -2,8 +2,6 @@ import Project from "../Models/Project.js";
 import User from "../Models/User.js";
 import { throwError } from "../error.js";
 
-
-// create a project
 // create a project
 export const createProject = async (req, res, next) => {
     try {
@@ -51,15 +49,15 @@ export const deleteProject = async (req, res, next) => {
 }
 
 // rename a project
-export const renameProject = async (req, res, next) => {
+export const updateProject = async (req, res, next) => {
     try {
         const proj = await Project.findById(req.params.id)
         if (!proj) return next(throwError(404, "Project not found!"))
-        if (req.user.id === proj.userId) {
-            const updatedProj = await Project.findByIdAndUpdate({
-                title: req.params.id
+        if (req.body.ownerId === proj.ownerId) {
+            const updatedProj = await Project.findByIdAndUpdate(req.params.id, {
+                code: req.body.code
             });
-        res.status(200).json("Project has been renamed");
+        res.status(200).json("Project has been updated");
         }
         else {
             return next(throwError(403, "You can only update your own projects."))
