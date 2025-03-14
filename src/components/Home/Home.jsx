@@ -4,10 +4,11 @@ import Button from '../Button/Button';
 import { useSelector } from 'react-redux';
 import SignInModal from '../Modal/SignIn';
 import SignOutModal from '../Modal/SignOut';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Project from '../Project/Project';
 import { axiosp as axios } from '../../../proxy'; // import axios from 'axios'
 import { current } from '@reduxjs/toolkit';
+import { useNavigate } from 'react-router-dom';
 
 // axios
 
@@ -20,18 +21,45 @@ export default function Home() {
     const [SignOutMenu, SignOutMenuOpen] = useState(false);
     const [ProjectName, SetProjectName] = useState('New Project')
     const [ProjectLang, SetProjectLang] = useState('javascript')
+    const navigate = useNavigate();
+    const [projects, setProjects] = useState([]); // Store projects
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            if (!currentUser?._id) return;
+            try {
+                const userRes = await axios.get(`/api/users/find/${currentUser._id}`);
+                const projectIds = userRes.data.projects || [];
+
+                const projectPromises = projectIds.map(id => axios.get(`/api/projects/${id}`));
+                const projectResults = await Promise.all(projectPromises);
+
+                setProjects(projectResults.map(res => res.data));
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            }
+        };
+        fetchProjects();
+    }, [currentUser]);
 
     const createProject = async (e) => {
         e.preventDefault();
-        // await console.log(currentUser._id)
-        const res = await axios.post("/api/projects/", {
-            ownerId: currentUser._id,
-            title: ProjectName, 
-            language: ProjectLang
-        }, { withCredentials: true });
-        // console.log(res.data)
-
-    }
+        
+        try {
+            const res = await axios.post("/api/projects/", {
+                ownerId: currentUser._id,
+                title: ProjectName, 
+                language: ProjectLang
+            }, { withCredentials: true });
+    
+            // Extract project ID and redirect
+            if (res.data && res.data._id) {
+                navigate(`/editor/${res.data._id}`);
+            }
+        } catch (error) {
+            console.error("Error creating project:", error);
+        }
+    };
 
     return (
 
@@ -39,11 +67,19 @@ export default function Home() {
             <SignInModal open={SignInMenu} setOpen={SignInMenuOpen} />
             <SignOutModal open={SignOutMenu} setOpen={SignOutMenuOpen} />
             <div className='user-projects-list'>
-                <Project name="Project Title" language='python'/>
-                <Project name="Project Title"/>
-                <Project name="Project Title"/>
-                <Project name="Project Title"/>
-                <Project name="Project Title"/>
+                {projects.length > 0 ? (
+                    projects.map(project => (
+                        <Project
+                            key={project._id}
+                            name={project.title}
+                            author={project.ownerId}
+                            updated={new Date(project.lastupdated).toLocaleString()}
+                            language={project.language}
+                        />
+                    ))
+                ) : (
+                    <p>No projects found.</p>
+                )}
             </div>
             <div className='user-info'>
                 <div className='user-options'>

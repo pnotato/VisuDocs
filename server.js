@@ -9,6 +9,9 @@ import 'dotenv/config'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import { Server as SocketIOServer } from "socket.io";
+// Store the latest code per room
+const roomData = {};
+const roomMessages = {};
 
 dotenv.config()
 const app = express();
@@ -36,17 +39,40 @@ async function websockets() {
             origin: ["http://localhost:5173"]
         }
     });
-    
+
     io.on("connection", (socket) => {
-        console.log(`User joined with ID: ${socket.id}`)
-    
-        socket.on('editor-update', value => {
-            // console.log(value);
-            io.emit('editor-update-return', value)
-        })
-    
-    })
-    console.log("\x1b[32m[server.js] Websocket server initialized :)\x1b[0m")
+        console.log(`User connected: ${socket.id}`);
+
+        socket.on('join-room', (roomId) => {
+            socket.join(roomId);
+            console.log(`Socket ${socket.id} joined room ${roomId}`);
+            // Send the latest code to the new user
+            if (roomData[roomId]) {
+                socket.emit('editor-update-return', { room: roomId, value: roomData[roomId] });
+            }
+            // Send existing chat history to the new user
+            if (roomMessages[roomId]) {
+                socket.emit('chat-history', { room: roomId, messages: roomMessages[roomId] });
+            }
+        });
+        socket.on('chat-message', ({ room, message }) => {
+            if (!roomMessages[room]) {
+                roomMessages[room] = [];
+            }
+            roomMessages[room].push(message);
+            io.to(room).emit('chat-message-return', { room, message });
+        });
+        socket.on('editor-update', ({ room, value }) => {
+            roomData[room] = value; // Store latest code for the room
+            io.to(room).emit('editor-update-return', { room, value }); // Sends update to all clients in the room
+        });
+
+        socket.on('disconnect', () => {
+            console.log(`User disconnected: ${socket.id}`);
+        });
+    });
+
+    console.log("\x1b[32m[server.js] Websocket server initialized :)\x1b[0m");
 }
 
 

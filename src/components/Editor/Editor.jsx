@@ -1,5 +1,6 @@
 import { Editor } from "@monaco-editor/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { CODE_SNIPPETS, FILE_EXTENSIONS } from "../../constants.js";
 import { executeCode } from "../api.js";
 import { useSelector } from "react-redux";
@@ -20,6 +21,19 @@ import { io } from "socket.io-client";
 const socket = io("ws://localhost:3000")
 
 const CodeEditor = ({ roomCode }) => {
+    const { id } = useParams();
+
+    useEffect(() => {
+        if (id) {
+            socket.emit('join-room', id);
+        }
+
+        return () => {
+            if (id) {
+                socket.emit('leave-room', id);
+            }
+        };
+    }, [id]);
     const editorRef = useRef();
     const [value, setValue] = useState('');
     const [language, setLanguage] = useState('javascript');
@@ -34,6 +48,37 @@ const CodeEditor = ({ roomCode }) => {
     
     const currentUser = useSelector(state=>state.user.currentUser) // redux to get user from storage
 
+    const [messages, setMessages] = useState([]);
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        // Listen for incoming chat messages
+        socket.on('chat-message-return', ({ room, message }) => {
+            if (room === id) {
+                setMessages((prevMessages) => [...prevMessages, message]);
+            }
+        });
+
+        // Load chat history when joining a room
+        socket.on('chat-history', ({ room, messages }) => {
+            if (room === id) {
+                setMessages(messages);
+            }
+        });
+
+        return () => {
+            socket.off('chat-message-return');
+            socket.off('chat-history');
+        };
+    }, [id]);
+
+    const sendMessage = () => {
+        if (message.trim() && id) {
+            socket.emit('chat-message', { room: id, message });
+            setMessage("");
+        }
+    };
+
     const onMount = (editor) => {
         editorRef.current = editor;
         editor.focus();
@@ -47,12 +92,23 @@ const CodeEditor = ({ roomCode }) => {
     }
 
     const onEditorUpdate = (value) => {
-        // console.log(value);
-        socket.emit('editor-update', value)
+        if (id) {
+            socket.emit('editor-update', { room: id, value });
+        }
     }
-    socket.on('editor-update-return', value => {
-        setValue(value);
-    });
+    useEffect(() => {
+        const handleEditorUpdate = ({ room, value }) => {
+            if (room === id) {
+                setValue(value);
+            }
+        };
+
+        socket.on('editor-update-return', handleEditorUpdate);
+
+        return () => {
+            socket.off('editor-update-return', handleEditorUpdate);
+        };
+    }, [id]);
 
     const runCode = async () => {
         const sourceCode = editorRef.current.getValue();
@@ -143,10 +199,25 @@ const CodeEditor = ({ roomCode }) => {
             </div>
             <div className={'code-output'}>
                 <div className="code-chat">
+
                     <div className={'code-chat-options'}>
                         <Button Label="Share" onClick={() => ShareMenuOpen(true)}/>
                         <Button Icon={currentUser ? <img style={{ height: '3vh', borderRadius: '20px' }} src={currentUser.img} /> : 'Sign In'} onClick={currentUser ? () => SignOutMenuOpen(true) : () => SignInMenuOpen(true)} />
                     </div>
+                    <div className="chat-messages">
+    {messages.map((msg, index) => (
+        <div key={index} className="chat-message">{msg}</div>
+    ))}
+</div>
+<div className="chat-input">
+    <input 
+        type="text" 
+        value={message} 
+        onChange={(e) => setMessage(e.target.value)} 
+        placeholder="Type a message..." 
+    />
+    <Button Label="Send" onClick={sendMessage} />
+</div>
                 </div>
                 <div className={'code-output-box'}>
                     <a style={{ color: error ? 'red' : output ? 'white' : 'grey' }}

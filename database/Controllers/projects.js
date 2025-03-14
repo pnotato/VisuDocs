@@ -4,20 +4,34 @@ import { throwError } from "../error.js";
 
 
 // create a project
+// create a project
 export const createProject = async (req, res, next) => {
-    const proj = new Project({...req.body})
-    console.log(req.body)
     try {
-        const savedProj = await proj.save()
-        const updatedUser = await User.findByIdAndUpdate(req.ownerId, {
-                        $push: { projects: savedProj.id },
-                        
-        }, { new: true });
-        res.status(200).send(savedProj)
-    } catch(err) {
+        const proj = new Project({...req.body});
+        console.log(req.body);
+
+        const savedProj = await proj.save();
+
+        const userId = req.user?.id || req.body.ownerId;
+        if (!userId) {
+            return next(throwError(400, "User ID is required"));
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId, 
+            { $push: { projects: savedProj._id } }, 
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return next(throwError(404, "User not found"));
+        }
+
+        res.status(200).send(savedProj);
+    } catch (err) {
         next(err);
     }
-}
+};
 
 // delete a project
 export const deleteProject = async (req, res, next) => {
