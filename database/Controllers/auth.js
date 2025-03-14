@@ -32,7 +32,9 @@ export const signIn = async (req, res, next)=>{
         const {password, ...others} = user._doc; 
 
         res.cookie("access_token", token, {
-            httpOnly:true
+            httpOnly:true,
+            sameSite: "none",
+            secure: false,
         })
         .status(200)
         .json(others);

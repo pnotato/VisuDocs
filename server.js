@@ -38,7 +38,7 @@ async function websockets() {
     });
     
     io.on("connection", (socket) => {
-        // console.log(`User joined with ID: ${socket.id}`)
+        console.log(`User joined with ID: ${socket.id}`)
     
         socket.on('editor-update', value => {
             // console.log(value);

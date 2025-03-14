@@ -1,11 +1,18 @@
 import Project from "../Models/Project.js";
+import User from "../Models/User.js";
 import { throwError } from "../error.js";
+
 
 // create a project
 export const createProject = async (req, res, next) => {
-    const proj = new Project({...req.body, ownerId: req.user.id})
+    const proj = new Project({...req.body})
+    console.log(req.body)
     try {
         const savedProj = await proj.save()
+        const updatedUser = await User.findByIdAndUpdate(req.ownerId, {
+                        $push: { projects: savedProj.id },
+                        
+        }, { new: true });
         res.status(200).send(savedProj)
     } catch(err) {
         next(err);
@@ -25,7 +32,7 @@ export const deleteProject = async (req, res, next) => {
         }
     }
     else {
-        return next(createError(403, "You can only delete your own projects."))
+        return next(throwError(403, "You can only delete your own projects."))
     }
 }
 
@@ -33,7 +40,7 @@ export const deleteProject = async (req, res, next) => {
 export const renameProject = async (req, res, next) => {
     try {
         const proj = await Project.findById(req.params.id)
-        if (!proj) return next(createError(404, "Project not found!"))
+        if (!proj) return next(throwError(404, "Project not found!"))
         if (req.user.id === proj.userId) {
             const updatedProj = await Project.findByIdAndUpdate({
                 title: req.params.id
@@ -41,7 +48,7 @@ export const renameProject = async (req, res, next) => {
         res.status(200).json("Project has been renamed");
         }
         else {
-            return next(createError(403, "You can only update your own projects."))
+            return next(throwError(403, "You can only update your own projects."))
         }
     }catch(err){
         next(err)

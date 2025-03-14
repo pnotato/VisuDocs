@@ -4,8 +4,8 @@ import { verifyToken } from '../verifyToken.js';
 
 const router = express.Router()
 
-router.post("/", verifyToken, createProject)
-router.delete("/:id", verifyToken, deleteProject)
+router.post("/", createProject)
+router.delete("/:id", deleteProject)
 router.put("/:id", renameProject)
 router.get("/:id", getProject)
 

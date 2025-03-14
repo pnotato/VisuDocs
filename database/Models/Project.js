@@ -11,11 +11,12 @@ const projectSchema = new mongoose.Schema({
     },
     language: {
         type: String,
+        required: true,
         default: 'javascript'
     },
     code: {
         type: String,
-        required: true
+        default: ""
     },
     lastupdated: {
         type: Date,

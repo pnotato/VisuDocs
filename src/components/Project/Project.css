@@ -34,7 +34,7 @@
 }
 
 .project-icon {
-    background-color: green;
+    background-color: #201c1c;
     height: calc(20vh - 40px);
     aspect-ratio: 1/1;
     border-radius: 10px;
