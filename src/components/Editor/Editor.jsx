@@ -34,10 +34,11 @@ const CodeEditor = ({ roomCode }) => {
     const [SignInMenu, SignInMenuOpen] = useState(false);
     const [SignOutMenu, SignOutMenuOpen] = useState(false);
     const [fontSize, setFontSize] = useState(14);
-    const currentUser = useSelector(state=>state.user.currentUser) // redux to get user from storage
     const [saving, setSaving] = useState(false);
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
+    const currentUser = useSelector(state=>state.user.currentUser) // redux to get user from storage
+
 
     const { id } = useParams();
 
@@ -54,7 +55,10 @@ const CodeEditor = ({ roomCode }) => {
                     axios.get(`/api/projects/${id}`)
                         .then((res) => {
                             if (res.data && res.data.code) {
-                                setValue(res.data.code); // Set editor value
+                                setValue(res.data.code);
+                                setLanguage(res.data.language)
+                                socket.emit('language-update', { room: id, language: res.data.language });
+                                
                             }
                         })
                         .catch((error) => {
@@ -104,11 +108,13 @@ const CodeEditor = ({ roomCode }) => {
         editor.focus();
     }
 
-    const onSelect = (language) => {
-        setLanguage(language);
-        setValue(
-            CODE_SNIPPETS[language]
-        )
+    const onSelect = (newLanguage) => {
+        setLanguage(newLanguage);
+        // setValue(CODE_SNIPPETS[newLanguage]);
+ 
+        if (id) {
+            socket.emit('language-update', { room: id, language: newLanguage });
+        }
     }
 
     const onEditorUpdate = (value) => {
@@ -116,6 +122,9 @@ const CodeEditor = ({ roomCode }) => {
             socket.emit('editor-update', { room: id, value });
         }
     }
+
+    // used so that when a new user joins the code is consistent
+    // problem before was that new users would join with default code, resulting in everyone else in the room's code being replaced.
     useEffect(() => {
         const handleEditorUpdate = ({ room, value }) => {
             if (room === id) {
@@ -127,6 +136,21 @@ const CodeEditor = ({ roomCode }) => {
 
         return () => {
             socket.off('editor-update-return', handleEditorUpdate);
+        };
+    }, [id]);
+ 
+    useEffect(() => {
+        const handleLanguageUpdate = ({ room, language }) => {
+            if (room === id) {
+                setLanguage(language);
+                console.log(language)
+            }
+        };
+ 
+        socket.on('language-update-return', handleLanguageUpdate);
+ 
+        return () => {
+            socket.off('language-update-return', handleLanguageUpdate);
         };
     }, [id]);
 
@@ -158,12 +182,7 @@ const CodeEditor = ({ roomCode }) => {
         }
     }
 
-    const saveProject = async () => {
-        if (!id) {
-            console.error("Project ID is missing.");
-            return;
-        }
-    
+    const saveProject = async () => {    
         setSaving(true);
         try {
             const res = await axios.put(`/api/projects/${id}`, { ownerId: currentUser._id, code: value });

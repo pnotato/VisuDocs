@@ -11,6 +11,7 @@ import cors from 'cors'
 import { Server as SocketIOServer } from "socket.io";
 // Store the latest code per room
 const roomData = {};
+const roomLang = {};
 const roomMessages = {};
 
 dotenv.config()
@@ -41,18 +42,19 @@ async function websockets() {
     });
 
     io.on("connection", (socket) => {
-        console.log(`User connected: ${socket.id}`);
-
         socket.on('join-room', (roomId) => {
             socket.join(roomId);
             console.log(`Socket ${socket.id} joined room ${roomId}`);
-            // Send the latest code to the new user
             if (roomData[roomId]) {
                 socket.emit('editor-update-return', { room: roomId, value: roomData[roomId] });
+                
             }
-            // Send existing chat history to the new user
             if (roomMessages[roomId]) {
                 socket.emit('chat-history', { room: roomId, messages: roomMessages[roomId] });
+    
+            }
+            if (roomLang[roomId]) {
+                socket.emit('language-update-return', { room: roomId, language: roomLang[roomId] });
             }
         });
         socket.on('chat-message', ({ room, message }) => {
@@ -65,6 +67,11 @@ async function websockets() {
         socket.on('editor-update', ({ room, value }) => {
             roomData[room] = value; // Store latest code for the room
             io.to(room).emit('editor-update-return', { room, value }); // Sends update to all clients in the room
+        });
+        
+        socket.on('language-update', ({ room, language }) => {
+            roomLang[room] = language;
+            io.to(room).emit('language-update-return', { room, language });
         });
 
         socket.on('disconnect', () => {
