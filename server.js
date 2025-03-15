@@ -9,12 +9,16 @@ import 'dotenv/config'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import { Server as SocketIOServer } from "socket.io";
+import { createClient } from 'redis';
 
 // Since this is a smaller scope, dictionaries are used for temporary code storage in the server
 // Basically, when a new user joins the websocket room, the data will be  saved into these dictionaries.
 //
 // This data does not persist between server resets. There is a save button I have implemented that will
 // save the data to MongoDB, and will load the data from there instead when the first person joins the room.
+//
+// Perhaps this can be solved with redis?
+
 
 const roomData = {};
 const roomLang = {};
@@ -25,6 +29,23 @@ const app = express();
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 const server = http.createServer(app);
 console.log("\n\x1b[32m[server.js] Express server initialized :)\x1b[0m")
+
+
+const redisClient = createClient();
+
+
+// redis
+async function redis() {
+    try {
+        await redisClient.connect();
+        console.log("\x1b[32m[server.js] Redis client initialized :)\x1b[0m")
+    } catch(error) {
+        console.log("\x1b[31m[server.js] Redis error :(\x1b[0m")
+        console.error(error)
+    }
+}
+
+
 
 // MongoDB
 
@@ -117,5 +138,6 @@ app.use("/api/users", userRoutes)
 server.listen(3000, async () => {
     await connect()
     await websockets()
+    await redis()
     console.log('\x1b[32m[server.js] Server running on port 3000 :)\x1b[0m\n');
   });
