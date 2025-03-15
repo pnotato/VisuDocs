@@ -24,7 +24,7 @@ export default function SignOutModal({ open, setOpen=()=>{}, overlay=true }) {
   }
 
   const handleRedirectHome = () => {
-    navigate('/home')
+    navigate('/')
   }
 
   const handleLogout = async (e) => {

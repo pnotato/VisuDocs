@@ -41,7 +41,6 @@ async function connect() {
 // Socketing
 
 async function websockets() {
-
     const io = new SocketIOServer(server, {
         cors: {
             origin: ["http://localhost:5173"]
@@ -50,30 +49,20 @@ async function websockets() {
 
     io.on("connection", (socket) => {
         socket.on('join-room', (roomId) => {
-            const users = io.sockets.adapter.rooms.get(roomId);
-            const userCount = users ? users.size : 0
-            console.log(`\x1b[33m[${roomId}] UserCount: ${userCount}\x1b[0m`);
-            
             socket.join(roomId);
-            if (userCount == 1) {
-                socket.emit('editor-initialization', {room: roomId})
-            } else {
-                if (roomData[roomId]) {
-                    socket.emit('editor-update-return', { room: roomId, value: roomData[roomId] });
-                }
-                if (roomMessages[roomId]) {
-                    socket.emit('chat-history', { room: roomId, messages: roomMessages[roomId] });
-        
-                }
-                if (roomLang[roomId]) {
-                    socket.emit('language-update-return', { room: roomId, language: roomLang[roomId] });
-                }
+            console.log(`Socket ${socket.id} joined room ${roomId}`);
+            if (roomData[roomId]) {
+                socket.emit('editor-update-return', { room: roomId, value: roomData[roomId] });
+                
+            }
+            if (roomMessages[roomId]) {
+                socket.emit('chat-history', { room: roomId, messages: roomMessages[roomId] });
+    
+            }
+            if (roomLang[roomId]) {
+                socket.emit('language-update-return', { room: roomId, language: roomLang[roomId] });
             }
         });
-
-
-
-
         socket.on('chat-message', ({ room, message }) => {
             if (!roomMessages[room]) {
                 roomMessages[room] = [];
@@ -92,7 +81,6 @@ async function websockets() {
         });
 
         socket.on('disconnect', () => {
-            
             console.log(`User disconnected: ${socket.id}`);
         });
     });
