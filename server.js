@@ -19,7 +19,6 @@ import { createClient } from 'redis';
 //
 // Perhaps this can be solved with redis?
 
-
 const roomData = {};
 const roomLang = {};
 const roomMessages = {};
@@ -91,8 +90,6 @@ async function websockets() {
                 }
             }
         });
-
-
 
 
         socket.on('chat-message', ({ room, message }) => {
