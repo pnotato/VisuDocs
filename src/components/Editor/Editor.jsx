@@ -91,14 +91,14 @@ const CodeEditor = ({ roomCode }) => {
         });
 
         return () => {
-            socket.off('chat-message-return');
+            socket.off('message-update-return');
             socket.off('chat-history');
         };
     }, [id]);
 
     const sendMessage = () => {
         if (message.trim() && id) {
-            socket.emit('chat-message', { room: id, message });
+            socket.emit('message-update', { room: id, message });
             setMessage("");
         }
     };
