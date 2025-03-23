@@ -61,8 +61,7 @@ export default function Home() {
     };
 
     return (
-
-        <div className='interface'>
+        <div className="w-full max-w-screen-xl mx-auto">
             <SignInModal open={SignInMenu} setOpen={SignInMenuOpen} />
             <SignOutModal open={SignOutMenu} setOpen={SignOutMenuOpen} />
             <div className='user-projects-list'>
@@ -106,6 +105,5 @@ export default function Home() {
                 </div>
             </div>
         </div>
-
     )
 }
