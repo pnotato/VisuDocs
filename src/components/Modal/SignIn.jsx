@@ -102,7 +102,7 @@ export default function SignInModal({ open, setOpen=blank, overlay=true }) {
                     <div className='sign-in-form-buttons'>
                     <Button Label='Sign Up' onClick={handleRedirect}/>
                       <div className='sign-in-buttons'>
-                      <Button Icon={<FcGoogle />} onClick={handleGoogleLogin}/>
+                      <Button Icon={<FcGoogle />} className="h-10 px-4 bg-gray-800 hover:bg-gray-700 text-white rounded flex items-center justify-center" onClick={handleGoogleLogin}/>
                       <Button Label='Sign In' onClick={handleLogin}/>
                       </div>
                     

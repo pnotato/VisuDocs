@@ -33,18 +33,19 @@ export const createProject = async (req, res, next) => {
 
 // delete a project
 export const deleteProject = async (req, res, next) => {
-    if (req.params.id === req.user.id) {
-        try {
+    try {
+        const proj = await Project.findById(req.params.id)
+        console.log(req.user.id, proj.ownerId)
+        if (req.user.id === proj.ownerId) {
             await Project.findByIdAndDelete(
                 req.params.id
             ); 
             res.status(200).json("Project has been deleted")
-        }catch(err){
-            next(err)
+        } else {
+            return next(throwError(403, "You can only delete your own projects."))
         }
-    }
-    else {
-        return next(throwError(403, "You can only delete your own projects."))
+    }catch(error) {
+        next(error)
     }
 }
 

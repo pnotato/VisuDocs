@@ -60,7 +60,6 @@ async function redis() {
 // We pull the data from MongoDB instead.
 
 
-
 // MongoDB
 
 async function connect() {
@@ -182,7 +181,7 @@ setInterval(async () => {
         console.log(error)
     }
     
-}, 30000);  // Every 30s
+}, 120000);  // Every 120s
 
 // Express
 

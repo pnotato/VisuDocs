@@ -1,14 +1,13 @@
 import { LuShare2, LuTrash2 } from "react-icons/lu";
 import { useState } from "react";
 
-export default function Card({ title, lastUpdated, imageSrc, onClick, url }) {
+export default function Card({ title, lastUpdated, imageSrc, onClick, onDelete, url }) {
     const [showConfirm, setShowConfirm] = useState(false);
     const [showShare, setShowShare] = useState(false);
 
     const handleDelete = () => {
-        // Here you can trigger the actual deletion logic
+        onDelete();
         setShowConfirm(false);
-        alert(`Deleted project: ${title}`);
     };
 
     return (

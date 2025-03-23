@@ -18,10 +18,10 @@ export const CODE_SNIPPETS = {
   };
 
 export const FILE_EXTENSIONS = {
-  javascript: "file.js",
-  typescript: "file.ts",
-  python: "file.py",
-  java: "file.java",
-  csharp: "file.cs",
-  php: "file.php",
+  javascript: "js",
+  typescript: "ts",
+  python: "py",
+  java: "java",
+  csharp: "cs",
+  php: "php",
 }
