@@ -80,7 +80,8 @@ async function websockets() {
 
     const io = new SocketIOServer(server, {
         cors: {
-            origin: ["http://localhost:5173"]
+            origin: ["http://localhost:5173"],
+            credentials: true,
         }
     });
 
@@ -107,8 +108,13 @@ async function websockets() {
                         code = project.code;
                         language = project.language;
                     }
-                    await redisClient.set(`roomData:${roomId}`, code, { EX: 1800 });
-                    await redisClient.set(`roomLang:${roomId}`, language, { EX: 1800 });
+                    if (code) {
+                        await redisClient.set(`roomData:${roomId}`, code, { EX: 1800 });
+                    }
+                    if (language) {
+                        await redisClient.set(`roomLang:${roomId}`, language, { EX: 1800 });
+                    }
+                    
                 } catch(error) {
                     console.log(error)
                 }
@@ -138,7 +144,11 @@ async function websockets() {
             io.to(room).emit('message-update-return', { room, message });
         });
         socket.on('editor-update', async ({ room, value }) => {
-            await redisClient.set(`roomData:${room}`, value, { EX: 1800 })
+            if (typeof value === 'string') {
+                await redisClient.set(`roomData:${room}`, value, { EX: 1800 });
+            } else {
+                console.warn(`[Redis] Skipped storing non-string value for room ${room}:`, value);
+            }
             io.to(room).emit('editor-update-return', { room, value }); // Sends update to all clients in the room
         });
         
@@ -181,8 +191,7 @@ setInterval(async () => {
         console.log(error)
     }
     
-}, 120000);  // Every 120s
-
+}, 120000);  // Every 2 min
 // Express
 
 app.get('/', (req, res) => {
@@ -201,4 +210,4 @@ server.listen(3000, async () => {
     await websockets()
     await redis()
     console.log('\x1b[32m[server.js] Server running on port 3000 :)\x1b[0m\n');
-  });
+});

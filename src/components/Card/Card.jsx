@@ -5,8 +5,8 @@ export default function Card({ title, lastUpdated, imageSrc, onClick, onDelete, 
     const [showConfirm, setShowConfirm] = useState(false);
     const [showShare, setShowShare] = useState(false);
 
-    const handleDelete = () => {
-        onDelete();
+    const handleDelete = async () => {
+        await onDelete();
         setShowConfirm(false);
     };
 

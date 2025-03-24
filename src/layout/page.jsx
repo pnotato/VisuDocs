@@ -27,7 +27,7 @@ export default function BaseLayout({ children }) {
     e.preventDefault();
     dispatch(loginStart());
     try {
-        const res = await axios.post("/api/auth/signup", { name, email, password });
+        const res = await axios.post("/api/auth/signup", { name, email, password }, { withCredentials: true });
         dispatch(loginSuccess(res.data));
         navigate('/');
         setShowAuthModal(false);
@@ -40,7 +40,7 @@ export default function BaseLayout({ children }) {
         e.preventDefault(); // prevents page from reloading on blank sign ins.
         dispatch(loginStart())
         try {
-            const res = await axios.post("/api/auth/signin", {email, password})
+            const res = await axios.post("/api/auth/signin", {email, password}, { withCredentials: true })
             dispatch(loginSuccess(res.data))
             navigate('/dashboard')
             setShowAuthModal(false);
@@ -56,7 +56,7 @@ export default function BaseLayout({ children }) {
             name: result.user.displayName,
             email: result.user.email,
             img: result.user.photoURL
-        }).then((res)=>{
+        }, { withCredentials: true }).then((res)=>{
             navigate('/dashboard')
             dispatch(loginSuccess(res.data))
             setShowAuthModal(false);

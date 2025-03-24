@@ -1,5 +1,6 @@
 import './App.css'
 import CodeEditor from './components/Editor/Editor.jsx'
+import EditorPage from './editor/page.jsx';
 import Home from './components/Home/Home.jsx';
 import SignIn from './components/SignIn/signin.jsx';
 import SignUp from './components/SignIn/SignUp.jsx'
@@ -11,13 +12,11 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/editor/:id" element={<EditorPage />} />
+        <Route path="/editor" element={<CodeEditor />} />
         <Route element={<BaseLayout />}>
           <Route path="/" element={''} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/editor/:id" element={<CodeEditor />} />
-          <Route path="/editor" element={<CodeEditor />} />
         </Route>
       </Routes>
     </Router>

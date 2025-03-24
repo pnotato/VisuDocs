@@ -1,6 +1,6 @@
 import Card from "../components/Card/Card.jsx";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { axiosp as axios } from "../../proxy.js";
 import { useNavigate } from 'react-router-dom';
 import { LANGUAGE_VERSIONS, FILE_EXTENSIONS } from "../constants.js";
@@ -17,30 +17,32 @@ export default function Dashboard() {
 
     const languageOptions = ["javascript", "typescript", "python", "java", "csharp",  "php"];
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            if (!currentUser?._id) return;
-            try {
-                const userRes = await axios.get(`/api/users/find/${currentUser._id}`);
-                const projectIds = userRes.data.projects || [];
-                const projectPromises = projectIds.map(id => axios.get(`/api/projects/${id}`));
-                const projectResults = await Promise.all(projectPromises);
-                const formattedProjects = projectResults
-                  .filter(res => res.data)
-                  .map(res => ({
-                    title: res.data.title,
-                    lastUpdated: `Last edited ${new Date(res.data.lastupdated).toLocaleString()}`,
-                    imageSrc: `/icons/${res.data.language?.toLowerCase() || "icon"}.png`,
-                    url: `/editor/${res.data.ownerId}`,
-                    id: res.data.ownerId
-                  }));
-                setProjects(prev => [...prev, ...formattedProjects]);
-            } catch (error) {
-                console.error("Error fetching projects:", error);
-            }
-        };
-        fetchProjects();
+    const fetchProjects = useCallback(async () => {
+        if (!currentUser?._id) return;
+        try {
+            const userRes = await axios.get(`/api/users/find/${currentUser._id}`);
+            const projectIds = userRes.data.projects || [];
+            const projectPromises = projectIds.map(id => axios.get(`/api/projects/${id}`));
+            const projectResults = await Promise.all(projectPromises);
+            const formattedProjects = projectResults
+              .filter(res => res.data)
+              .map(res => ({
+                title: res.data.title,
+                lastUpdated: `Last edited ${new Date(res.data.lastupdated).toLocaleString()}`,
+                imageSrc: `/icons/${res.data.language?.toLowerCase() || "icon"}.png`,
+                url: `/editor/${res.data.ownerId}`,
+                OwnerId: res.data.ownerId,
+                id: res.data._id
+              }));
+            setProjects(formattedProjects);
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+        }
     }, [currentUser]);
+
+    useEffect(() => {
+        fetchProjects();
+    }, [fetchProjects]);
 
     const createProject = async (e) => {
         e.preventDefault();
@@ -61,12 +63,11 @@ export default function Dashboard() {
 
     const deleteProject = async (id) => {
         try {
-            const res = await axios.delete(`/api/projects/${id}`, { withCredentials: true })
-            navigate("/dashboard")
+            await axios.delete(`/api/projects/${id}`, { withCredentials: true });
+            await fetchProjects();
         } catch(error) {
             console.error("Error Deleting Project", error)
         }
-
     }
 
     return (
@@ -108,7 +109,9 @@ export default function Dashboard() {
                     ))}
                     <div className="bg-gray-800 border border-gray-800 rounded-lg shadow-md p-6 text-white max-w-md w-full h-full flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors border-2 border-dashed border-gray-600">
                         <div className="text-3xl mb-2 text-purple-400">+</div>
-                        <div className="text-sm text-gray-300">Create New Project</div>
+                        <button onClick={() => setShowNewProject(true)} className="text-sm text-gray-300">
+                          Create New Project
+                        </button>
                     </div>
                 </div>
                 {showShare && (

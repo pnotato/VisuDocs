@@ -35,7 +35,6 @@ export const createProject = async (req, res, next) => {
 export const deleteProject = async (req, res, next) => {
     try {
         const proj = await Project.findById(req.params.id)
-        console.log(req.user.id, proj.ownerId)
         if (req.user.id === proj.ownerId) {
             await Project.findByIdAndDelete(
                 req.params.id
