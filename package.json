@@ -24,6 +24,7 @@
     "express": "^4.21.2",
     "firebase": "^11.4.0",
     "jsonwebtoken": "^9.0.2",
+    "monaco-themes": "^0.4.4",
     "mongoose": "^8.12.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
