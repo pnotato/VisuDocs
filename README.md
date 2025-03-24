@@ -8,6 +8,12 @@ Frontend was built with React and TailwindCSS. Backend was built using Express, 
 
 Uses the [monaco editor](https://github.com/microsoft/monaco-editor) for the code editor and the Piston API to execute the code.
 
+# UI Screenshots
+
+![VisuDocs Editor](./documentation/images/editor.jpeg)
+
+![VisuDocs Dashboard](./documentation/images/dashboard.jpeg)
+
 # Usage
 
 ```git clone``` the repository and install the dependencies

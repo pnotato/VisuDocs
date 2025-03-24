@@ -13,6 +13,7 @@ import { axiosp } from "../../proxy"; // import axios from 'axios'
 const socket = io("ws://localhost:3000");
 
 import { Editor } from "@monaco-editor/react";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function EditorPage() {
   const [showChat, setShowChat] = useState(true);
@@ -25,6 +26,7 @@ export default function EditorPage() {
   const isResizingChat = useRef(false);
   const editorRef = useRef();
   const currentUser = useSelector((state) => state.user.currentUser);
+  const navigate = useNavigate();
 
   const [projectTitle, setProjectTitle] = useState("");
   const [projectCode, setProjectCode] = useState("");
@@ -78,7 +80,7 @@ export default function EditorPage() {
         <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/icons/icon.png" alt="Logo" className="h-8 w-auto" />
+              <img onClick={() => navigate("/")} src="/icons/icon.png" alt="Logo" className="h-8 w-auto cursor-pointer" />
               <input
                 type="text"
                 defaultValue="Project Name"
@@ -180,7 +182,9 @@ export default function EditorPage() {
           className={`flex-1 flex flex-col ${showChat ? "w-2/3" : "w-full"}`}
         >
           <div className="flex-1 overflow-auto px-4 py-2 font-mono text-sm bg-black">
-            <Editor onMount={onMount} />
+            <Editor onMount={onMount} 
+            language='javascript'
+            options={{ fontSize: 14}}/>
           </div>
           {/* Output Box */}
           {showOutput && (
