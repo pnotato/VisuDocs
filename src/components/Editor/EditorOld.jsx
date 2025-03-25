@@ -226,7 +226,7 @@ const CodeEditor = ({ roomCode }) => {
                     <div className='selector-options'>
                         <Selector language={language} onSelect={onSelect} />
                         <Button Icon={<LuSettings />} onClick={() => EditorSettingsOpen(true)} />
-                        <Button Icon={<LuDownload />} onClick={() => downloadScript(value, FILE_EXTENSIONS[language])} />
+                        <Button Icon={<LuDownload />} onClick={() => downloadScript(value)} />
                         <Button Label={saving ? "Saving..." : "Save"} onClick={saveProject} />
                     </div>
 

@@ -87,16 +87,18 @@ async function websockets() {
 
     io.on("connection", (socket) => {
         socket.on('join-room', async (roomId) => {
+            socket.join(roomId);
             const users = io.sockets.adapter.rooms.get(roomId);
             const userCount = users ? users.size : 0
             if (verbose) {
                 console.log(`\x1b[33m[${roomId}] UserCount: ${userCount}\x1b[0m`);
             }
             
-            let [code, language, messages] = await Promise.all([
+            let [code, language, messages, title] = await Promise.all([
                 redisClient.get(`roomData:${roomId}`),
                 redisClient.get(`roomLanguage:${roomId}`),
-                redisClient.lRange(`roomMessages:${roomId}`, 0, -1)
+                redisClient.lRange(`roomMessages:${roomId}`, 0, -1),
+                redisClient.get(`roomTitle:${roomId}`),
             ]);
 
             // Fallback, if the data expires, grab the data from MongoDB.
@@ -120,8 +122,8 @@ async function websockets() {
                 }
             }
 
-            socket.join(roomId);
-            if (userCount == 1) {
+            
+            if (userCount === 1) {
                 socket.emit('editor-initialization', {room: roomId})
             } else {
                 if (code) {
@@ -129,7 +131,9 @@ async function websockets() {
                 }
                 if (language) {
                     socket.emit('language-update-return', { room: roomId, language: language });
-        
+                }
+                if (title) {
+                    socket.emit('title-update-return', { room: roomId, title: title });
                 }
                 if (messages) {
                     socket.emit('message-update-return', { room: roomId, messages: messages });
@@ -157,6 +161,11 @@ async function websockets() {
             io.to(room).emit('language-update-return', { room, language });
         });
 
+        socket.on('title-update', async ({ room, title }) => {
+            await redisClient.set(`roomTitle:${room}`, title, { EX: 1800 })
+            io.to(room).emit('title-update-return', { room, title})
+        })
+
         socket.on('disconnect', () => {
             if (verbose) {
                 console.log(`\x1b[33m[server.js] User ${socket.id} disconnected \x1b[0m`);
@@ -173,14 +182,15 @@ setInterval(async () => {
     try {
         for (let key of rooms) {
             const roomId = key.split(":")[1];
-            const [code, language, messages] = await Promise.all([
+            const [code, language, messages, title] = await Promise.all([
                 redisClient.get(`roomData:${roomId}`),
                 redisClient.get(`roomLang:${roomId}`),
-                redisClient.lRange(`roomMessages:${roomId}`, 0, -1)
+                redisClient.lRange(`roomMessages:${roomId}`, 0, -1),
+                redisClient.get(`roomTitle:${roomId}`)
             ]);
     
-            if (code || language) {
-                await Project.findByIdAndUpdate(roomId, { code, language, messages });
+            if (code || language || title) {
+                await Project.findByIdAndUpdate(roomId, { code, language, title, messages });
             }
         }
         if (verbose) {

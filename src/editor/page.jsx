@@ -83,6 +83,35 @@ export default function EditorPage() {
     }
   };
 
+// -- Downloading Code
+
+const downloadScript = (content) => {
+    const filename = (projectTitle || "file") + "." + FILE_EXTENSIONS[projectLanguage];
+    const mimeTypes = {
+      js: "text/javascript",
+      ts: "application/typescript",
+      py: "text/x-python",
+      java: "text/x-java-source",
+      cs: "text/plain",
+      php: "application/x-httpd-php",
+    };
+    const extension = FILE_EXTENSIONS[projectLanguage];
+    const mimeType = mimeTypes[extension] || "text/plain";
+  
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+  
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+  
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+
   // -- Sign in
 
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -246,6 +275,12 @@ export default function EditorPage() {
     }
   };
 
+  const onTitleUpdate = (value) => {
+    if (id) {
+        socket.emit("title-update", { room: id, title: value })
+    }
+  }
+
   // used so that when a new user joins the code is consistent
   // problem before was that new users would join with default code, resulting in everyone else in the room's code being replaced.
   useEffect(() => {
@@ -266,7 +301,7 @@ export default function EditorPage() {
     const handleLanguageUpdate = ({ room, language }) => {
       if (room === id) {
         setProjectLanguage(language);
-        console.log(language);
+
       }
     };
 
@@ -276,6 +311,20 @@ export default function EditorPage() {
       socket.off("language-update-return", handleLanguageUpdate);
     };
   }, [id]);
+
+  useEffect(() => {
+    const handleTitleUpdate = ({ room, title }) => {
+      if (room === id && title !== projectTitle) {
+        setProjectTitle(title);
+      }
+    };
+  
+    socket.on("title-update-return", handleTitleUpdate);
+  
+    return () => {
+      socket.off("title-update-return", handleTitleUpdate);
+    };
+  }, [id, projectTitle]);
 
   return (
     <div className="h-screen flex flex-col bg-black text-white">
@@ -291,7 +340,11 @@ export default function EditorPage() {
               />
               <input
                 type="text"
-                defaultValue="Project Name"
+                defaultValue={projectTitle}
+                onChange={(e) => {
+
+                    onTitleUpdate(e.target.value);
+                  }}
                 className="border border-gray-600 px-3 py-2 rounded-md text-sm font-medium text-white bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
             </div>
@@ -386,7 +439,7 @@ export default function EditorPage() {
               </div>
 
               <div className="relative group">
-                <button className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
+                <button onClick={() => downloadScript(projectCode)} className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
                   <HiOutlineCloudDownload className="h-5 w-5" />
                 </button>
                 <span className="absolute bottom-[-1.8rem] left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
