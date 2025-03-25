@@ -114,7 +114,7 @@ export default function Dashboard() {
                         </button>
                     </div>
                 </div>
-                {showShare && (
+                {/* {showShare && (
                     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
                         <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[300px]">
                             <h3 className="text-lg font-semibold mb-4">Share Project</h3>
@@ -144,7 +144,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
-                )}
+                )} */}
                 {showNewProject && (
                     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
                         <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[300px]">

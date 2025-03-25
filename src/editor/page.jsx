@@ -6,18 +6,30 @@ import {
   HiOutlineSave,
 } from "react-icons/hi";
 
-import { useSelector } from "react-redux";
+import { LANGUAGE_VERSIONS, FILE_EXTENSIONS } from "../constants";
+
+import { loginStart, loginSuccess, loginFailure } from "../redux/userSlice";
+import { auth, provider } from "../../firebase";
+import { signInWithPopup } from "firebase/auth";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../redux/userSlice";
 import { io } from "socket.io-client";
 import { executeCode } from "../components/api";
-import { axiosp } from "../../proxy"; // import axios from 'axios'
+import { axiosp as axios } from "../../proxy"; // import axios from 'axios'
 const socket = io("ws://localhost:3000");
 
-import { Editor } from "@monaco-editor/react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import Output from "../components/Output/Output";
+import Chat from "../components/Chat/Chat";
+import EditorComponent from "../components/Editor/EditorComponent";
+import { FcGoogle } from "react-icons/fc";
 
 export default function EditorPage() {
   const [showChat, setShowChat] = useState(true);
   const [showOutput, setShowOutput] = useState(true);
+  const [showShare, setShowShare] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [outputHeight, setOutputHeight] = useState(200);
   const [chatWidth, setChatWidth] = useState(300);
   const outputRef = useRef(null);
@@ -25,28 +37,146 @@ export default function EditorPage() {
   const isResizingOutput = useRef(false);
   const isResizingChat = useRef(false);
   const editorRef = useRef();
-  const currentUser = useSelector((state) => state.user.currentUser);
-  const navigate = useNavigate();
+  const languageOptions = ["javascript", "typescript", "python", "java", "csharp",  "php"];
+  // -- Values for monaco editor
 
   const [projectTitle, setProjectTitle] = useState("");
   const [projectCode, setProjectCode] = useState("");
-  const [projectLanguage, setProjectLanguage] = useState("");
+  const [projectLanguage, setProjectLanguage] = useState('javascript');
   const [projectMessages, setProjectMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState("");
 
+  const [editorSize, setEditorSize] = useState(14);
+
+  // -- Values for output box
+  const [output, setOutput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  //
+
+  // -- Executing Code
+  const runCode = async () => {
+    const sourceCode = projectCode;
+    if (!sourceCode) return;
+    setOutput("Loading...");
+    setShowOutput(true);
+    setError(false);
+    try {
+      setIsLoading(true);
+      const { run: result } = await executeCode(projectLanguage, sourceCode);
+      setOutput(result.output);
+      if (result.stderr) {
+        setError(true);
+      }
+      if (result.signal == "SIGKILL") {
+        throw "SIGKILL";
+        // Generally this occurs if your code takes too long, i.e long for loops
+        // In which the piston API just kills the process.
+      }
+    } catch (error) {
+      setError(true);
+      setOutput("Timed out.");
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false); // used for loading spinner
+    }
+  };
+
+  // -- Sign in
+
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.user.currentUser);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [name, setName] = useState("");
+  const [authTab, setAuthTab] = useState("signin");
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    dispatch(loginStart());
+    try {
+      const res = await axios.post(
+        "/api/auth/signup",
+        { name, email, password },
+        { withCredentials: true }
+      );
+      dispatch(loginSuccess(res.data));
+      navigate("/");
+      setShowAuthModal(false);
+    } catch (error) {
+      dispatch(loginFailure());
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    dispatch(loginStart());
+    try {
+      const res = await axios.post(
+        "/api/auth/signin",
+        { email, password },
+        { withCredentials: true }
+      );
+      dispatch(loginSuccess(res.data));
+      navigate("/dashboard");
+      setShowAuthModal(false);
+    } catch (error) {
+      dispatch(loginFailure());
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    dispatch(loginStart());
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        axios
+          .post(
+            "/api/auth/google",
+            {
+              name: result.user.displayName,
+              email: result.user.email,
+              img: result.user.photoURL,
+            },
+            { withCredentials: true }
+          )
+          .then((res) => {
+            dispatch(loginSuccess(res.data));
+            setShowAuthModal(false);
+          });
+      })
+      .catch((error) => {
+        dispatch(loginFailure());
+      });
+  };
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    dispatch(logout());
+    navigate("/");
+  };
+
+  // -- useEffects for resizing the chat and output windows.
+
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (isResizingOutput.current && outputRef.current) {
-        const bottom = outputRef.current.getBoundingClientRect().bottom;
-        const newHeight = Math.max(80, Math.min(400, bottom - e.clientY));
-        setOutputHeight(newHeight);
-      }
+      requestAnimationFrame(() => {
+        if (isResizingOutput.current && outputRef.current) {
+          const bottom = outputRef.current.getBoundingClientRect().bottom;
+          const newHeight = Math.max(80, Math.min(400, bottom - e.clientY));
+          setOutputHeight(newHeight);
+        }
 
-      if (isResizingChat.current && chatRef.current) {
-        const right = chatRef.current.getBoundingClientRect().right;
-        const newWidth = Math.max(200, Math.min(500, right - e.clientX));
-        setChatWidth(newWidth);
-      }
+        if (isResizingChat.current && chatRef.current) {
+          const right = chatRef.current.getBoundingClientRect().right;
+          const newWidth = Math.max(200, Math.min(500, right - e.clientX));
+          setChatWidth(newWidth);
+        }
+      });
     };
 
     const handleMouseUp = () => {
@@ -63,16 +193,89 @@ export default function EditorPage() {
     };
   }, []);
 
-  const onMount = async (editor, monaco) => {
-    editorRef.current = editor;
-    editor.focus();
+  // -- useEffects for websockets
+  const { id } = useParams();
+  useEffect(() => {
+    if (id) {
+      socket.emit("join-room", id);
 
-    const themeData = await import(
-      "monaco-themes/themes/Brilliance Black.json"
-    );
-    monaco.editor.defineTheme("brilliance-black", themeData);
-    monaco.editor.setTheme("brilliance-black");
+      // Request the current user count in the room
+      socket.emit("get-user-count", id, (userCount) => {
+        console.log(`Users in room: ${userCount}`);
+
+        if (userCount <= 1) {
+          axios
+            .get(`/api/projects/${id}`)
+            .then((res) => {
+              if (res.data && res.data.code) {
+                setProjectCode(res.data.code);
+                setProjectLanguage(res.data.language);
+                socket.emit("language-update", {
+                  room: id,
+                  language: res.data.language,
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching project code:", error);
+            });
+        }
+      });
+    }
+
+    return () => {
+      if (id) {
+        socket.emit("leave-room", id);
+      }
+    };
+  }, [id]);
+
+  const onSelect = (newLanguage) => {
+    setProjectLanguage(newLanguage);
+    // setValue(CODE_SNIPPETS[newLanguage]);
+
+    if (id) {
+        socket.emit('language-update', { room: id, language: newLanguage });
+    }
+}
+
+  const onEditorUpdate = (value) => {
+    if (id) {
+      socket.emit("editor-update", { room: id, value });
+
+    }
   };
+
+  // used so that when a new user joins the code is consistent
+  // problem before was that new users would join with default code, resulting in everyone else in the room's code being replaced.
+  useEffect(() => {
+    const handleEditorUpdate = ({ room, value }) => {
+      if (room === id) {
+        setProjectCode(value);
+      }
+    };
+
+    socket.on("editor-update-return", handleEditorUpdate);
+
+    return () => {
+      socket.off("editor-update-return", handleEditorUpdate);
+    };
+  }, [id]);
+
+  useEffect(() => {
+    const handleLanguageUpdate = ({ room, language }) => {
+      if (room === id) {
+        setProjectLanguage(language);
+        console.log(language);
+      }
+    };
+
+    socket.on("language-update-return", handleLanguageUpdate);
+
+    return () => {
+      socket.off("language-update-return", handleLanguageUpdate);
+    };
+  }, [id]);
 
   return (
     <div className="h-screen flex flex-col bg-black text-white">
@@ -80,7 +283,12 @@ export default function EditorPage() {
         <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
-              <img onClick={() => navigate("/")} src="/icons/icon.png" alt="Logo" className="h-8 w-auto cursor-pointer" />
+              <img
+                onClick={() => navigate("/")}
+                src="/icons/icon.png"
+                alt="Logo"
+                className="h-8 w-auto cursor-pointer"
+              />
               <input
                 type="text"
                 defaultValue="Project Name"
@@ -89,16 +297,78 @@ export default function EditorPage() {
             </div>
             <div className="flex items-center gap-2">
               <div className="relative group">
-                <button className="h-10 w-10 flex items-center justify-center bg-purple-600 hover:bg-purple-700 rounded-md text-sm font-medium transition duration-150 ease-in-out active:scale-95">
+                <button onClick={runCode} className="h-10 w-10 flex items-center justify-center bg-purple-600 hover:bg-purple-700 rounded-md text-sm font-medium transition duration-150 ease-in-out active:scale-95">
                   <LuPlay className="h-5 w-5" />
                 </button>
                 <span className="absolute bottom-[-1.8rem] left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                   Run Code
                 </span>
               </div>
-
+              {showShare && (
+                    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                        <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[300px]">
+                            <h3 className="text-lg font-semibold mb-4">Share Project</h3>
+                            <input
+                                type="text"
+                                className="w-full px-3 py-2 rounded bg-gray-800 text-white mb-4"
+                                value={document.URL}
+                                readOnly
+                                onClick={(e) => e.target.select()}
+                            />
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    className="bg-gray-700 px-3 py-1.5 rounded hover:bg-gray-600 transition-colors"
+                                    onClick={() => setShowShare(false)}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    className="bg-purple-600 px-3 py-1.5 rounded hover:bg-purple-500 transition-colors"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(document.URL);
+                                        setShowShare(false);
+                                    }}
+                                >
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                                {showSettings && (
+                                    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                                        <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[300px]">
+                                            <h3 className="text-lg font-semibold mb-4">Project Settings</h3>
+                                            <select
+                                                className="w-full px-3 py-2 rounded bg-gray-800 text-white mb-4"
+                                                value={projectLanguage}
+                                                onChange={(e) => onSelect(e.target.value)}
+                                            >
+                                                {languageOptions.map((lang) => (
+                                                    <option key={lang} value={lang}>{lang + " " + LANGUAGE_VERSIONS[lang]}</option>
+                                                ))}
+                                            </select>
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <img
+                                                    src={`/icons/${projectLanguage.toLowerCase()}.png`}
+                                                    alt={projectLanguage}
+                                                    className="w-8 h-8 object-contain rounded"
+                                                />
+                                                <span className="text-sm">{projectLanguage.charAt(0).toUpperCase() + projectLanguage.slice(1) + " (." + FILE_EXTENSIONS[projectLanguage] + ")"}</span>
+                                            </div>
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    className="bg-gray-700 px-3 py-1.5 rounded hover:bg-gray-600 transition-colors"
+                                                    onClick={() => setShowSettings(false)}
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
               <div className="relative group">
-                <button className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
+                <button onClick={() => setShowSettings(true)} className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
                   <LuSettings className="h-5 w-5" />
                 </button>
                 <span className="absolute bottom-[-1.8rem] left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
@@ -157,7 +427,7 @@ export default function EditorPage() {
               </div>
 
               <div className="relative group">
-                <button className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
+                <button onClick={() => setShowShare(true)} className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
                   <LuShare2 className="h-5 w-5" />
                 </button>
                 <span className="absolute bottom-[-1.8rem] left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
@@ -166,9 +436,54 @@ export default function EditorPage() {
               </div>
 
               <div className="ml-2">
-                <button className="h-10 px-4 flex items-center justify-center bg-purple-600 hover:bg-purple-700 rounded-md text-sm font-medium transition duration-150 ease-in-out active:scale-95">
-                  Sign In
-                </button>
+                {currentUser ? (
+                  <Menu as="div" className="relative ml-3">
+                    <div>
+                      <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
+                        <span className="absolute -inset-1.5" />
+                        <span className="sr-only">Open user menu</span>
+                        <img
+                          alt={currentUser.name}
+                          src={currentUser.img}
+                          className="size-8 rounded-full"
+                        />
+                      </MenuButton>
+                    </div>
+                    <MenuItems
+                      transition
+                      className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-black border-1 border-gray-800 py-1 ring-1 shadow-lg ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                    >
+                      <MenuItem>
+                        <a
+                          href="#"
+                          className="block px-4 py-2 text-sm text-gray-50 data-focus:bg-gray-800 data-focus:outline-hidden"
+                        >
+                          Your Profile
+                        </a>
+                      </MenuItem>
+                      <MenuItem>
+                        <a
+                          onClick={(e) => handleLogout(e)}
+                          className="block px-4 py-2 text-sm text-red-500 data-focus:bg-gray-800 data-focus:outline-hidden"
+                        >
+                          Sign out
+                        </a>
+                      </MenuItem>
+                    </MenuItems>
+                  </Menu>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setAuthTab("signin");
+                        setShowAuthModal(true);
+                      }}
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -176,78 +491,141 @@ export default function EditorPage() {
       </div>
 
       {/* Main Content */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 text-white rounded p-6 w-96 relative">
+            <div className="flex justify-center gap-4 mb-4 border-b border-gray-700">
+              <button
+                className={`px-4 py-2 ${
+                  authTab === "signin"
+                    ? "border-b-2 border-white text-white"
+                    : "text-gray-400"
+                }`}
+                onClick={() => setAuthTab("signin")}
+              >
+                Sign In
+              </button>
+              <button
+                className={`px-4 py-2 ${
+                  authTab === "register"
+                    ? "border-b-2 border-white text-white"
+                    : "text-gray-400"
+                }`}
+                onClick={() => setAuthTab("register")}
+              >
+                Register
+              </button>
+            </div>
+
+            {/* Shared form structure */}
+            {authTab === "signin" ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full mb-2 p-2 bg-gray-800 text-white border border-gray-600 rounded"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full mb-4 p-2 bg-gray-800 text-white border border-gray-600 rounded"
+                />
+              </>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full mb-2 p-2 bg-gray-800 text-white border border-gray-600 rounded"
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full mb-2 p-2 bg-gray-800 text-white border border-gray-600 rounded"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full mb-2 p-2 bg-gray-800 text-white border border-gray-600 rounded"
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  className="w-full mb-4 p-2 bg-gray-800 text-white border border-gray-600 rounded"
+                />
+              </>
+            )}
+
+            <div className="flex justify-between items-center">
+              <div>
+                <button
+                  className="px-4 py-2 border border-gray-500 text-gray-300 rounded hover:bg-gray-700"
+                  onClick={() => setShowAuthModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  title="Sign in with Google"
+                  onClick={handleGoogleLogin}
+                  className="h-10 px-4 bg-gray-800 hover:bg-gray-700 text-white rounded flex items-center justify-center"
+                >
+                  <FcGoogle className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={authTab === "signin" ? handleLogin : handleSignUp}
+                  className={`px-4 py-2 rounded ${
+                    authTab === "signin"
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "bg-green-600 hover:bg-green-700"
+                  } text-white`}
+                >
+                  {authTab === "signin" ? "Sign In" : "Register"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-1 overflow-hidden">
         {/* Editor Area */}
         <div
           className={`flex-1 flex flex-col ${showChat ? "w-2/3" : "w-full"}`}
         >
-          <div className="flex-1 overflow-auto px-4 py-2 font-mono text-sm bg-black">
-            <Editor onMount={onMount} 
-            language='javascript'
-            options={{ fontSize: 14}}/>
-          </div>
+          <EditorComponent
+            projectCode={projectCode}
+            projectLanguage={projectLanguage}
+            editorSize={editorSize}
+            editorRef={editorRef}
+            onEditorUpdate={onEditorUpdate}
+          />
           {/* Output Box */}
-          {showOutput && (
-            <>
-              <div
-                className="h-1 cursor-ns-resize bg-gray-800"
-                onMouseDown={() => (isResizingOutput.current = true)}
-              />
-              <div
-                ref={outputRef}
-                style={{ height: `${outputHeight}px` }}
-                className="border-t border-gray-700 px-4 py-4 text-sm text-gray-400 bg-gray-950 resize-y overflow-auto font-mono"
-              >
-                Output will appear here after running code...
-              </div>
-            </>
-          )}
-        </div>
 
-        {/* Chat Panel */}
-        {showChat && (
-          <>
-            <div
-              className="w-1 cursor-ew-resize bg-gray-800"
-              onMouseDown={() => (isResizingChat.current = true)}
-            />
-            <div
-              ref={chatRef}
-              style={{ width: `${chatWidth}px` }}
-              className="flex flex-col border-l border-gray-800 bg-gray-950"
-            >
-              <div className="p-2 border-b border-gray-800 font-semibold text-sm">
-                Messages
-              </div>
-              <div className="flex-1 overflow-y-auto px-2 py-1 text-sm space-y-2">
-                <div>
-                  <p className="text-purple-400 font-semibold">
-                    Alice{" "}
-                    <span className="text-xs text-gray-500">10:01 AM</span>
-                  </p>
-                  <p>Started working on the layout.</p>
-                </div>
-                <div>
-                  <p className="text-purple-400 font-semibold">
-                    Bob <span className="text-xs text-gray-500">10:05 AM</span>
-                  </p>
-                  <p>Cool! I’ll hook up the backend next.</p>
-                </div>
-              </div>
-              <div className="border-t border-gray-800 p-2">
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 px-2 py-1 rounded bg-gray-800 text-white text-sm"
-                    placeholder="Type a message..."
-                  />
-                  <button className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition duration-150 ease-in-out active:scale-95">
-                    Send
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+          <Output
+            showOutput={showOutput}
+            output={output}
+            outputRef={outputRef}
+            outputHeight={outputHeight}
+            isResizingOutput={isResizingOutput}
+            isLoading={isLoading}
+            colour={error ? 'text-red-500' : 'text-grey-400'}
+          />
+        </div>
+        <Chat
+          showChat={showChat}
+          chatRef={chatRef}
+          setChatWidth={setChatWidth}
+          chatWidth={chatWidth}
+          isResizingChat={isResizingChat}
+          
+        />
       </div>
     </div>
   );

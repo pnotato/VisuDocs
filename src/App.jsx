@@ -1,5 +1,5 @@
 import './App.css'
-import CodeEditor from './components/Editor/Editor.jsx'
+import CodeEditor from './components/Editor/EditorOld.jsx'
 import EditorPage from './editor/page.jsx';
 import Home from './components/Home/Home.jsx';
 import SignIn from './components/SignIn/signin.jsx';

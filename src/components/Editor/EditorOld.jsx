@@ -50,7 +50,7 @@ const CodeEditor = ({ roomCode }) => {
             socket.emit('get-user-count', id, (userCount) => {
                 console.log(`Users in room: ${userCount}`);
                 
-                if (userCount === 1) { // First user joins, fetch code from database
+                if (userCount === 1) {
                     
                     axios.get(`/api/projects/${id}`)
                         .then((res) => {
@@ -177,7 +177,6 @@ const CodeEditor = ({ roomCode }) => {
             setError(true);
             setOutput("Timed out.")
         } finally {
-
             setIsLoading(false); // used for loading spinner
         }
     }
