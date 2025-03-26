@@ -15,6 +15,8 @@ A collaborative, real-time code editor with support for multi-user editing. Simi
   </a>
 </div>
 
+Video demo can be found ![here](https://www.youtube.com/watch?v=pAY6s_Z3O5Q).
+
 # Tech Stack
 
 *Frontend:* Built with React and TailwindCSS. Uses the [Monaco code editor](https://github.com/microsoft/monaco-editor) for the main editor functionality, and [Piston](https://github.com/engineer-man/piston) to run the code itself. 
