@@ -12,18 +12,6 @@ import { Server as SocketIOServer } from "socket.io";
 import { createClient } from 'redis';
 import Project from './database/Models/Project.js';
 
-// Since this is a smaller scope, dictionaries are used for temporary code storage in the server
-// Basically, when a new user joins the websocket room, the data will be  saved into these dictionaries.
-//
-// This data does not persist between server resets. There is a save button I have implemented that will
-// save the data to MongoDB, and will load the data from there instead when the first person joins the room.
-//
-// Perhaps this can be solved with redis?
-
-const roomData = {};
-const roomLang = {};
-const roomMessages = {};
-
 // Initialization Flags. 
 
 const verbose = process.argv.includes('-l') || process.argv.includes('--log');
