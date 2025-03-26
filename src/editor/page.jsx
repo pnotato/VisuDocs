@@ -81,7 +81,7 @@ export default function EditorPage() {
     } catch (error) {
       setError(true);
       if (error === "SIGKILL") {
-        setOutput("Timed out. This usually occurs if your code took too long to run, uses too much memory, or if the output is too large.");
+        setOutput("Timed out. Your code may be taking too long to run, forcing the Piston API to stop after a time limit has been reached.");
       }
       else {
         setOutput("Timed out.");  

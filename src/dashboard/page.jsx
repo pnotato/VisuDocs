@@ -13,7 +13,7 @@ export default function Dashboard() {
     const [showShare, setShowShare] = useState(false);
     const [showNewProject, setShowNewProject] = useState(false);
     const [newProjectTitle, setNewProjectTitle] = useState("");
-    const [newProjectLanguage, setNewProjectLanguage] = useState("JavaScript");
+    const [newProjectLanguage, setNewProjectLanguage] = useState("javascript");
 
     const languageOptions = ["javascript", "typescript", "python", "java", "csharp",  "php"];
 
@@ -28,7 +28,7 @@ export default function Dashboard() {
               .filter(res => res.data)
               .map(res => ({
                 title: res.data.title,
-                lastUpdated: `Last edited ${new Date(res.data.lastupdated).toLocaleString()}`,
+                lastUpdated: `${new Date(res.data.lastupdated).toLocaleString()}`,
                 imageSrc: `/icons/${res.data.language?.toLowerCase() || "icon"}.png`,
                 url: `/editor/${res.data._id}`,
                 OwnerId: res.data.ownerId,
@@ -107,44 +107,13 @@ export default function Dashboard() {
                             url={project}
                         />
                     ))}
-                    <div className="bg-gray-800 border border-gray-800 rounded-lg shadow-md p-6 text-white max-w-md w-full h-full flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors border-2 border-dashed border-gray-600">
+                    <div onClick={() => setShowNewProject(true)} className="bg-gray-800 border border-gray-800 rounded-lg shadow-md p-6 text-white max-w-md w-full h-full flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors border-2 border-dashed border-gray-600">
                         <div className="text-3xl mb-2 text-purple-400">+</div>
-                        <button onClick={() => setShowNewProject(true)} className="text-sm text-gray-300">
+                        <button  className="text-sm text-gray-300">
                           Create New Project
                         </button>
                     </div>
                 </div>
-                {/* {showShare && (
-                    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                        <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[300px]">
-                            <h3 className="text-lg font-semibold mb-4">Share Project</h3>
-                            <input
-                                type="text"
-                                className="w-full px-3 py-2 rounded bg-gray-800 text-white mb-4"
-                                value={project.url}
-                                readOnly
-                                onClick={(e) => e.target.select()}
-                            />
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    className="bg-gray-700 px-3 py-1.5 rounded hover:bg-gray-600 transition-colors"
-                                    onClick={() => setShowShare(false)}
-                                >
-                                    Close
-                                </button>
-                                <button
-                                    className="bg-purple-600 px-3 py-1.5 rounded hover:bg-purple-500 transition-colors"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(project.url);
-                                        setShowShare(false);
-                                    }}
-                                >
-                                    Copy
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )} */}
                 {showNewProject && (
                     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
                         <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[300px]">
