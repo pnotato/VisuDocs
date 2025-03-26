@@ -9,11 +9,11 @@
 
 A collaborative, real-time code editor with support for multi-user editing. Similar to Google Docs, VisuDocs is a code editor that uses websockets to support multiple users working on the same code. 
 
-![VisuDocs Editor](./documentation/images/editor.jpeg)
-
-![VisuDocs Dashboard](./documentation/images/dashboard.jpeg)
-
-[![YouTube](http://i.ytimg.com/vi/pAY6s_Z3O5Q/hqdefault.jpg)](https://www.youtube.com/watch?v=pAY6s_Z3O5Q)
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=pAY6s_Z3O5Q" target="_blank">
+    <img src="http://i.ytimg.com/vi/pAY6s_Z3O5Q/hqdefault.jpg" style="width: 100%; max-width: 900px;"/>
+  </a>
+</div>
 
 # Tech Stack
 
@@ -23,6 +23,19 @@ A collaborative, real-time code editor with support for multi-user editing. Simi
 
 *Auth/Security:* Uses MongoDB. Supports sign-in/sign-up with email or with Google via Firebase, secured with JSON Web Tokens (JWT) and cookie-based sessions.
 
+# UI Screenshots
+
+<div align="center">
+  <img src="./documentation/images/editor.jpeg" style="width: 100%; max-width: 900px;"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <img src="./documentation/images/dashboard.jpeg" style="width: 100%; max-width: 900px;"/>
+</div>
+
+<br/>
 
 # Usage
 
