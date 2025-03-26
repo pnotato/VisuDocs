@@ -26,7 +26,10 @@ A collaborative, real-time code editor with support for multi-user editing. Simi
 
 ### Video Demo
 
-![](./documentation/demo-video.mp4)
+<video controls="" width="3840" height="2160" muted="" loop="" autoplay="">
+    <source src="https://github.com/pnotato/VisuDocs/blob/main/documentation/demo-video.mp4" type="video/mp4">
+</video>
+
 
 # Usage
 
