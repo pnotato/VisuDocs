@@ -8,9 +8,13 @@
 </h1>
 
 A collaborative, real-time code editor with support for multi-user editing. Similar to Google Docs, VisuDocs is a code editor that uses websockets to support multiple users working on the same code. 
-
-
-
+<br>
+<div align="center">
+  <a href="./documentation/images/landing.png" target="_blank">
+    <img src="http://i.ytimg.com/vi/pAY6s_Z3O5Q/hqdefault.jpg" style="width: 100%; max-width: 900px;"/>
+  </a>
+</div>
+<br>
 Video demo can be found ![here](https://www.youtube.com/watch?v=pAY6s_Z3O5Q).
 
 # Tech Stack
