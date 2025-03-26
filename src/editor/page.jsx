@@ -80,7 +80,13 @@ export default function EditorPage() {
       }
     } catch (error) {
       setError(true);
-      setOutput("Timed out.");
+      if (error === "SIGKILL") {
+        setOutput("Timed out. This usually occurs if your code took too long to run, uses too much memory, or if the output is too large.");
+      }
+      else {
+        setOutput("Timed out.");  
+    }
+      
       setIsLoading(false);
     } finally {
       setIsLoading(false); // used for loading spinner
@@ -360,7 +366,7 @@ const downloadScript = (content) => {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
               <img
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/dashboard")}
                 src="/icons/icon.png"
                 alt="Logo"
                 className="h-8 w-auto cursor-pointer"
