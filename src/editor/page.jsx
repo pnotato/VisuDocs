@@ -100,6 +100,7 @@ const saveCode = async () => {
             code: projectCode,
             language: projectLanguage,
             title: projectTitle,
+            message: projectMessages,
             lastupdated: new Date().toISOString()
         }, { withCredentials: true });
         setLastSaved(new Date());
@@ -291,6 +292,19 @@ const downloadScript = (content) => {
     }
 }
 
+const onNewMessage = (text) => {
+    const message = {
+      sender: currentUser ? currentUser.name : "Anonymous",
+      text,
+      timestamp: Date.now(),
+    };
+    const newMessages = [...projectMessages, message];
+    setProjectMessages(newMessages);
+    if (id) {
+      socket.emit("message-update", { room: id, messages: newMessages });
+    }
+  };
+
   const onEditorUpdate = (value) => {
     if (id) {
       socket.emit("editor-update", { room: id, value });
@@ -333,6 +347,16 @@ const downloadScript = (content) => {
     return () => {
       socket.off("language-update-return", handleLanguageUpdate);
     };
+  }, [id]);
+
+  useEffect(() => {
+    const handleMessageUpdate = ({ room, messages }) => {
+      if (room === id) {
+        setProjectMessages(messages);
+      }
+    };
+    socket.on("message-update-return", handleMessageUpdate);
+    return () => socket.off("message-update-return", handleMessageUpdate);
   }, [id]);
 
   useEffect(() => {
@@ -710,12 +734,13 @@ const downloadScript = (content) => {
           />
         </div>
         <Chat
-          showChat={showChat}
-          chatRef={chatRef}
-          setChatWidth={setChatWidth}
-          chatWidth={chatWidth}
-          isResizingChat={isResizingChat}
-          
+  showChat={showChat}
+  chatRef={chatRef}
+  setChatWidth={setChatWidth}
+  chatWidth={chatWidth}
+  isResizingChat={isResizingChat}
+  messages={projectMessages}
+  onSendMessage={onNewMessage}
         />
       </div>
       

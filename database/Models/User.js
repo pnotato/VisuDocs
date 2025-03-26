@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     img: {
         type: String,
         required: true,
-        default: 'icons/blank.png'
+        default: '/icons/blank.png'
     },
     projects: [String],
 });

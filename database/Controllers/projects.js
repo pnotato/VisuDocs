@@ -54,7 +54,7 @@ export const updateProject = async (req, res, next) => {
         const proj = await Project.findById(req.params.id)
 
         if (!proj) return next(throwError(404, "Project not found!"))
-        if (req.user.id === proj.ownerId) {
+
             await Project.findByIdAndUpdate(req.params.id, {
                 title: req.body.title,
                 code: req.body.code,
@@ -62,10 +62,7 @@ export const updateProject = async (req, res, next) => {
                 lastupdated: req.body.lastupdated
             });
         res.status(200).json("Project has been updated");
-        }
-        else {
-            return next(throwError(403, "You can only update your own projects."))
-        }
+
     }catch(err){
         next(err)
     }  

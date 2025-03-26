@@ -14,6 +14,7 @@ export default function Dashboard() {
     const [showNewProject, setShowNewProject] = useState(false);
     const [newProjectTitle, setNewProjectTitle] = useState("");
     const [newProjectLanguage, setNewProjectLanguage] = useState("javascript");
+    const [joinCode, setJoinCode] = useState("");
 
     const languageOptions = ["javascript", "typescript", "python", "java", "csharp",  "php"];
 
@@ -82,8 +83,24 @@ export default function Dashboard() {
                             type="text"
                             placeholder="Join with code..."
                             className="px-4 py-2 rounded bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 w-full sm:w-auto"
+                            value={joinCode}
+                            onChange={(e) => setJoinCode(e.target.value)}
                         />
-                        <button className="bg-gray-800 text-white px-3 py-1.5 text-sm rounded hover:bg-gray-700 transition-colors h-[38px]">
+                        <button
+                            className="bg-gray-800 text-white px-3 py-1.5 text-sm rounded hover:bg-gray-700 transition-colors h-[38px]"
+                            onClick={() => {
+                                try {
+                                    const url = new URL(joinCode);
+                                    if (url.pathname.includes("/editor/")) {
+                                        const id = url.pathname.split("/editor/")[1];
+                                        if (id) navigate(`/editor/${id}`);
+                                    }
+                                } catch {
+                                    // Not a valid URL, treat as ID
+                                    if (joinCode) navigate(`/editor/${joinCode}`);
+                                }
+                            }}
+                        >
                             Join
                         </button>
                         <button

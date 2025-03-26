@@ -94,12 +94,19 @@ async function websockets() {
                 console.log(`\x1b[33m[${roomId}] UserCount: ${userCount}\x1b[0m`);
             }
             
-            let [code, language, messages, title] = await Promise.all([
+            let [code, language, title] = await Promise.all([
                 redisClient.get(`roomData:${roomId}`),
                 redisClient.get(`roomLanguage:${roomId}`),
-                redisClient.lRange(`roomMessages:${roomId}`, 0, -1),
                 redisClient.get(`roomTitle:${roomId}`),
             ]);
+
+            let messages = await redisClient.get(`roomMessages:${roomId}`);
+            try {
+            messages = messages ? JSON.parse(messages) : [];
+            } catch {
+            messages = [];
+            }
+            socket.emit("message-update-return", { room: roomId, messages });
 
             if (userCount === 1) {
                 try {
@@ -108,6 +115,7 @@ async function websockets() {
                         code = project.code;
                         language = project.language;
                         title = project.title;
+                        messages = project.messages
                         const ops = [];
 
                         if (typeof code === 'string') {
@@ -130,11 +138,12 @@ async function websockets() {
         });
 
 
-        socket.on('message-update', async ({ room, message }) => {
-            await redisClient.rPush(`roomMessages:${room}`, message);
-            await redisClient.expire(`roomMessages:${room}`, 1800);
-            io.to(room).emit('message-update-return', { room, message });
-        });
+        socket.on('message-update', async ({ room, messages }) => {
+            if (Array.isArray(messages)) {
+              await redisClient.set(`roomMessages:${room}`, JSON.stringify(messages), { EX: 1800 });
+              io.to(room).emit('message-update-return', { room, messages });
+            }
+          });
         socket.on('editor-update', async ({ room, value }) => {
             if (typeof value === 'string') {
                 await redisClient.set(`roomData:${room}`, value, { EX: 1800 });
@@ -183,38 +192,6 @@ async function websockets() {
     }
 }
 
-// THIS HAS BEEN CHANGED. This was my original implementation. Instead, a timer on the frontend runs now
-// To periodically save data to MongoDB.
-
-// Runs an auto save of all active rooms every 30 seconds. 
-// It would probably make more sense to sync each room periodically, but for the scope of this
-// project this was the simplest solution for me to implement.
-
-// setInterval(async () => {
-//     const rooms = await redisClient.keys("roomData:*");
-//     try {
-//         for (let key of rooms) {
-//             const roomId = key.split(":")[1];
-//             const [code, language, messages, title] = await Promise.all([
-//                 redisClient.get(`roomData:${roomId}`),
-//                 redisClient.get(`roomLang:${roomId}`),
-//                 redisClient.lRange(`roomMessages:${roomId}`, 0, -1),
-//                 redisClient.get(`roomTitle:${roomId}`)
-//             ]);
-    
-//             if (code || language || title) {
-//                 await Project.findByIdAndUpdate(roomId, { code, language, title, messages });
-//             }
-//         }
-//         if (verbose) {
-//             const now = new Date().toLocaleTimeString();
-//             console.log(`\x1b[32m[server.js] Active room data saved to MongoDB -- ${now} :)\x1b[0m`);
-//         }
-//     } catch(error) {
-//         console.log(error)
-//     }
-    
-// }, 30000);  // Every 30 seconds
 
 // Express
 
