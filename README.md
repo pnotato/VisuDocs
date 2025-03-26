@@ -19,11 +19,11 @@ A code editor that functions similar to Google Docs. Allows for multiple users t
 
 # Tech Stack
 
-*Frontend:* Built with React and TailwindCSS. Uses the [Monaco code editor](https://github.com/microsoft/monaco-editor) for the main editor functionality, and [Piston](https://github.com/engineer-man/piston) to run the code itself. 
+**Frontend:** Built with React and TailwindCSS. Uses the [Monaco code editor](https://github.com/microsoft/monaco-editor) for the main editor functionality, and [Piston](https://github.com/engineer-man/piston) to run the code itself. 
 
-*Backend:* Built with Express and Node.js, using Socket.io to handle multi-user and chat functionality. The code data for the projects themselves are stored in MongoDB, with Redis used as an in-memory cache to sync code and messages effectively.
+**Backend:** Built with Express and Node.js, using Socket.io to handle multi-user and chat functionality. The code data for the projects themselves are stored in MongoDB, with Redis used as an in-memory cache to sync code and messages effectively.
 
-*Auth/Security:* Uses MongoDB. Supports sign-in/sign-up with email or with Google via Firebase, secured with JSON Web Tokens (JWT) and cookie-based sessions.
+**Auth/Security:** Uses MongoDB. Supports sign-in/sign-up with email or with Google via Firebase, secured with JSON Web Tokens (JWT) and cookie-based sessions.
 
 # UI Screenshots
 
