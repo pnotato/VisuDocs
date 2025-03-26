@@ -41,7 +41,7 @@ A code editor that functions similar to Google Docs. Allows for multiple users t
 
 # Usage
 
-```git clone``` the repository and install the dependencies
+```git clone``` the repository and install the dependencies.
 ```
 git clone https://github.com/pnotato/VisuDocs
 cd VisuDocs
