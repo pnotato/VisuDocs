@@ -5,9 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import { logout } from '../../redux/userSlice.js';
 
 export default function Navbar({ currentPage, showAuthModal, setShowAuthModal, authTab, setAuthTab }) {
+
+  
+
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const currentUser = useSelector(state => state.user.currentUser)
+
 
     const handleLogout = async (e) => {
       e.preventDefault();

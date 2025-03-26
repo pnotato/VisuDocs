@@ -8,12 +8,14 @@ import { useNavigate } from "react-router-dom";
 import { loginStart, loginSuccess, loginFailure } from "../redux/userSlice";
 import { auth, provider } from "../../firebase";
 import { signInWithPopup } from "firebase/auth";
+import { useSelector } from "react-redux";
 
 export default function BaseLayout({ children }) {
     const location = useLocation();
     const currentPage = location.pathname;
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [authTab, setAuthTab] = useState('signin'); // 'signin' or 'register'
+    const currentUser = useSelector(state => state.user.currentUser)
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
