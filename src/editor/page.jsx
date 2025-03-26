@@ -253,22 +253,24 @@ const downloadScript = (content) => {
   const { id } = useParams();
   useEffect(() => {
     if (id) {
-      axios.get(`/api/projects/${id}`)
-        .then((res) => {
-          if (res.data) {
-            setProjectCode(res.data.code);
-            setProjectLanguage(res.data.language);
-            setProjectTitle(res.data.title);
-            if (res.data.lastupdated) {
-              setLastSaved(new Date(res.data.lastupdated));
-            }
-          }
-          setHasMounted(true);
-        })
-        .catch((error) => {
-          console.error("Error loading initial project from MongoDB:", error);
-        });
- 
+        async function fetchData() {
+            await axios.get(`/api/projects/${id}`)
+            .then((res) => {
+              if (res.data) {
+                setProjectCode(res.data.code);
+                setProjectLanguage(res.data.language);
+                setProjectTitle(res.data.title);
+                if (res.data.lastupdated) {
+                  setLastSaved(new Date(res.data.lastupdated));
+                }
+              }
+              setHasMounted(true);
+            })
+            .catch((error) => {
+              console.error("Error loading initial project from MongoDB:", error);
+            });
+        }
+        fetchData()
       socket.emit("join-room", id);
       socket.emit("request-redis-data", id);
     }
@@ -686,6 +688,7 @@ const downloadScript = (content) => {
           className={`flex-1 flex flex-col ${showChat ? "w-2/3" : "w-full"}`}
         >
           <EditorComponent
+            key={projectLanguage} // This will force the editor to update when the language changes
             projectCode={projectCode}
             projectLanguage={projectLanguage}
             editorSize={editorSize}
