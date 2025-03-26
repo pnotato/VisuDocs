@@ -5,7 +5,9 @@ export default function EditorComponent({
   projectLanguage,
   editorSize,
   editorRef,
-  onEditorUpdate
+  onEditorUpdate,
+  isSaving,
+  lastSaved
 }) {
   // Monaco Theming
   const onMount = async (editor, monaco) => {
@@ -20,19 +22,25 @@ export default function EditorComponent({
   };
 
   return (
-    <div className="flex-1 overflow-auto px-4 py-2 font-mono text-sm bg-black">
+    <div className="flex-1 overflow-auto px-4 py-2 font-mono text-sm bg-black relative">
       <Editor
         onChange={(projectCode) => {
-        // setValue(value);
-        onEditorUpdate(projectCode);
-    }}
+          // setValue(value);
+          onEditorUpdate(projectCode);
+        }}
         onMount={onMount}
         language={projectLanguage}
         value={projectCode}
         options={{
           fontSize: editorSize,
+          minimap: {
+            enabled: false
+          }
         }}
       />
+      <div className="absolute bottom-2 right-2 px-2 py-1 text-xs text-gray-300 bg-gray-800 border border-gray-600 rounded">
+        {isSaving ? "Saving..." : lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : ""}
+      </div>
     </div>
   );
 }

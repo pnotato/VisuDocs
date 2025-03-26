@@ -37,6 +37,7 @@ export default function EditorPage() {
   const isResizingOutput = useRef(false);
   const isResizingChat = useRef(false);
   const editorRef = useRef();
+  const saveTimeoutRef = useRef(null);
   const languageOptions = ["javascript", "typescript", "python", "java", "csharp",  "php"];
   // -- Values for monaco editor
 
@@ -52,6 +53,9 @@ export default function EditorPage() {
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [hasMounted, setHasMounted] = useState(false);
 
   //
 
@@ -82,6 +86,23 @@ export default function EditorPage() {
       setIsLoading(false); // used for loading spinner
     }
   };
+
+const saveCode = async () => {
+    try {
+        setIsSaving(true);
+        await axios.put(`/api/projects/${id}`, {
+            code: projectCode,
+            language: projectLanguage,
+            title: projectTitle,
+            lastupdated: new Date().toISOString()
+        }, { withCredentials: true });
+        setLastSaved(new Date());
+    } catch (error) {
+        console.error("Save failed:", error);
+    } finally {
+        setIsSaving(false);
+    }
+};
 
 // -- Downloading Code
 
@@ -226,32 +247,26 @@ const downloadScript = (content) => {
   const { id } = useParams();
   useEffect(() => {
     if (id) {
+      axios.get(`/api/projects/${id}`)
+        .then((res) => {
+          if (res.data) {
+            setProjectCode(res.data.code);
+            setProjectLanguage(res.data.language);
+            setProjectTitle(res.data.title);
+            if (res.data.lastupdated) {
+              setLastSaved(new Date(res.data.lastupdated));
+            }
+          }
+          setHasMounted(true);
+        })
+        .catch((error) => {
+          console.error("Error loading initial project from MongoDB:", error);
+        });
+ 
       socket.emit("join-room", id);
-
-      // Request the current user count in the room
-      socket.emit("get-user-count", id, (userCount) => {
-        console.log(`Users in room: ${userCount}`);
-
-        if (userCount <= 1) {
-          axios
-            .get(`/api/projects/${id}`)
-            .then((res) => {
-              if (res.data && res.data.code) {
-                setProjectCode(res.data.code);
-                setProjectLanguage(res.data.language);
-                socket.emit("language-update", {
-                  room: id,
-                  language: res.data.language,
-                });
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching project code:", error);
-            });
-        }
-      });
+      socket.emit("request-redis-data", id);
     }
-
+ 
     return () => {
       if (id) {
         socket.emit("leave-room", id);
@@ -325,6 +340,18 @@ const downloadScript = (content) => {
       socket.off("title-update-return", handleTitleUpdate);
     };
   }, [id, projectTitle]);
+
+  useEffect(() => {
+    if (!id || !hasMounted) return;
+        
+    saveTimeoutRef.current = setTimeout(() => {
+        
+      saveCode();
+      saveTimeoutRef.current = null;
+    }, 3000);
+ 
+    return () => clearTimeout(saveTimeoutRef.current);
+  }, [projectCode, projectLanguage, projectTitle]);
 
   return (
     <div className="h-screen flex flex-col bg-black text-white">
@@ -430,7 +457,7 @@ const downloadScript = (content) => {
               </div>
 
               <div className="relative group">
-                <button className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
+                <button onClick={saveCode} className="h-10 w-10 flex items-center justify-center border border-gray-600 rounded-md text-sm font-medium text-white hover:bg-gray-700 transition duration-150 ease-in-out active:scale-95">
                   <HiOutlineSave className="h-5 w-5" />
                 </button>
                 <span className="absolute bottom-[-1.8rem] left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
@@ -658,6 +685,8 @@ const downloadScript = (content) => {
             editorSize={editorSize}
             editorRef={editorRef}
             onEditorUpdate={onEditorUpdate}
+            isSaving={isSaving}
+            lastSaved={lastSaved}
           />
           {/* Output Box */}
 
@@ -680,6 +709,7 @@ const downloadScript = (content) => {
           
         />
       </div>
+      
     </div>
   );
 }

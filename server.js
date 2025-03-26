@@ -101,44 +101,32 @@ async function websockets() {
                 redisClient.get(`roomTitle:${roomId}`),
             ]);
 
-            // Fallback, if the data expires, grab the data from MongoDB.
-            // Occurs if the room is idle for over 30 min.
-            if (!code || !language) {
+            if (userCount === 1) {
                 try {
                     const project = await Project.findById(roomId);
                     if (project) {
                         code = project.code;
                         language = project.language;
-                    }
-                    if (code) {
-                        await redisClient.set(`roomData:${roomId}`, code, { EX: 1800 });
-                    }
-                    if (language) {
-                        await redisClient.set(`roomLang:${roomId}`, language, { EX: 1800 });
-                    }
-                    
-                } catch(error) {
-                    console.log(error)
-                }
-            }
+                        title = project.title;
+                        const ops = [];
 
-            
-            if (userCount === 1) {
-                socket.emit('editor-initialization', {room: roomId})
-            } else {
-                if (code) {
-                    socket.emit('editor-update-return', { room: roomId, value: code });
-                }
-                if (language) {
-                    socket.emit('language-update-return', { room: roomId, language: language });
-                }
-                if (title) {
-                    socket.emit('title-update-return', { room: roomId, title: title });
-                }
-                if (messages) {
-                    socket.emit('message-update-return', { room: roomId, messages: messages });
+                        if (typeof code === 'string') {
+                        ops.push(redisClient.set(`roomData:${roomId}`, code, { EX: 1800 }));
+                        }
+                        if (typeof language === 'string') {
+                        ops.push(redisClient.set(`roomLanguage:${roomId}`, language, { EX: 1800 }));
+                        }
+                        if (typeof title === 'string') {
+                        ops.push(redisClient.set(`roomTitle:${roomId}`, title, { EX: 1800 }));
+                        }
+
+                        await Promise.all(ops);
+                    }
+                } catch (error) {
+                    console.error("Error loading initial data from MongoDB:", error);
                 }
             }
+        
         });
 
 
@@ -165,6 +153,24 @@ async function websockets() {
             await redisClient.set(`roomTitle:${room}`, title, { EX: 1800 })
             io.to(room).emit('title-update-return', { room, title})
         })
+        
+        socket.on('request-redis-data', async (roomId) => {
+          const [code, language, title] = await Promise.all([
+            redisClient.get(`roomData:${roomId}`),
+            redisClient.get(`roomLanguage:${roomId}`),
+            redisClient.get(`roomTitle:${roomId}`),
+          ]);
+
+          if (code) {
+            socket.emit("editor-update-return", { room: roomId, value: code });
+          }
+          if (language) {
+            socket.emit("language-update-return", { room: roomId, language });
+          }
+          if (title) {
+            socket.emit("title-update-return", { room: roomId, title });
+          }
+        });
 
         socket.on('disconnect', () => {
             if (verbose) {
@@ -177,31 +183,39 @@ async function websockets() {
     }
 }
 
-setInterval(async () => {
-    const rooms = await redisClient.keys("roomData:*");
-    try {
-        for (let key of rooms) {
-            const roomId = key.split(":")[1];
-            const [code, language, messages, title] = await Promise.all([
-                redisClient.get(`roomData:${roomId}`),
-                redisClient.get(`roomLang:${roomId}`),
-                redisClient.lRange(`roomMessages:${roomId}`, 0, -1),
-                redisClient.get(`roomTitle:${roomId}`)
-            ]);
+// THIS HAS BEEN CHANGED. This was my original implementation. Instead, a timer on the frontend runs now
+// To periodically save data to MongoDB.
+
+// Runs an auto save of all active rooms every 30 seconds. 
+// It would probably make more sense to sync each room periodically, but for the scope of this
+// project this was the simplest solution for me to implement.
+
+// setInterval(async () => {
+//     const rooms = await redisClient.keys("roomData:*");
+//     try {
+//         for (let key of rooms) {
+//             const roomId = key.split(":")[1];
+//             const [code, language, messages, title] = await Promise.all([
+//                 redisClient.get(`roomData:${roomId}`),
+//                 redisClient.get(`roomLang:${roomId}`),
+//                 redisClient.lRange(`roomMessages:${roomId}`, 0, -1),
+//                 redisClient.get(`roomTitle:${roomId}`)
+//             ]);
     
-            if (code || language || title) {
-                await Project.findByIdAndUpdate(roomId, { code, language, title, messages });
-            }
-        }
-        if (verbose) {
-            const now = new Date().toLocaleTimeString();
-            console.log(`\x1b[32m[server.js] Active room data saved to MongoDB -- ${now} :)\x1b[0m`);
-        }
-    } catch(error) {
-        console.log(error)
-    }
+//             if (code || language || title) {
+//                 await Project.findByIdAndUpdate(roomId, { code, language, title, messages });
+//             }
+//         }
+//         if (verbose) {
+//             const now = new Date().toLocaleTimeString();
+//             console.log(`\x1b[32m[server.js] Active room data saved to MongoDB -- ${now} :)\x1b[0m`);
+//         }
+//     } catch(error) {
+//         console.log(error)
+//     }
     
-}, 120000);  // Every 2 min
+// }, 30000);  // Every 30 seconds
+
 // Express
 
 app.get('/', (req, res) => {

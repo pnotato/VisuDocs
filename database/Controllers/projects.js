@@ -52,10 +52,14 @@ export const deleteProject = async (req, res, next) => {
 export const updateProject = async (req, res, next) => {
     try {
         const proj = await Project.findById(req.params.id)
+
         if (!proj) return next(throwError(404, "Project not found!"))
-        if (req.body.ownerId === proj.ownerId) {
-            const updatedProj = await Project.findByIdAndUpdate(req.params.id, {
-                code: req.body.code
+        if (req.user.id === proj.ownerId) {
+            await Project.findByIdAndUpdate(req.params.id, {
+                title: req.body.title,
+                code: req.body.code,
+                language: req.body.language,
+                lastupdated: req.body.lastupdated
             });
         res.status(200).json("Project has been updated");
         }

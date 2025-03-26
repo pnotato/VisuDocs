@@ -30,7 +30,7 @@ export default function Dashboard() {
                 title: res.data.title,
                 lastUpdated: `Last edited ${new Date(res.data.lastupdated).toLocaleString()}`,
                 imageSrc: `/icons/${res.data.language?.toLowerCase() || "icon"}.png`,
-                url: `/editor/${res.data.ownerId}`,
+                url: `/editor/${res.data._id}`,
                 OwnerId: res.data.ownerId,
                 id: res.data._id
               }));
