@@ -1,3 +1,5 @@
+// Old version of the Editor, just for reference
+
 import { Editor } from "@monaco-editor/react";
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -20,6 +22,8 @@ import { LuSettings, LuDownload } from "react-icons/lu";
 import { io } from "socket.io-client";
 
 const socket = io("ws://localhost:3000")
+
+// Old version of the Editor, just for reference
 
 const CodeEditor = ({ roomCode }) => {
 

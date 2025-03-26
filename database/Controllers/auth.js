@@ -12,8 +12,16 @@ export const signUp = async (req, res, next) => {
         const hash = bcrypt.hashSync(req.body.password, salt);
         const newUser = new User({...req.body, password: hash}) // Change this line later. I'm not sure if the request body will be different.
 
-        await newUser.save()
-        res.status(200).send("User has been created!")
+        const savedUser = await newUser.save();
+        const token = jwt.sign({ id: savedUser._id }, process.env.JWT);
+        const { password, ...userWithoutPassword } = savedUser._doc;
+
+        res.cookie("access_token", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false,
+        }).status(200).json(userWithoutPassword)
+
     } catch(err) {
         next(err)
     }

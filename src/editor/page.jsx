@@ -74,6 +74,7 @@ export default function EditorPage() {
         setError(true);
       }
       if (result.signal == "SIGKILL") {
+        console.log(result)
         throw "SIGKILL";
         // Generally this occurs if your code takes too long, i.e long for loops
         // In which the piston API just kills the process.
