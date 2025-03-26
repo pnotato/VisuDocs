@@ -9,6 +9,12 @@
 
 A collaborative, real-time code editor with support for multi-user editing. Similar to Google Docs, VisuDocs is a code editor that uses websockets to support multiple users working on the same code. 
 
+![VisuDocs Editor](./documentation/images/editor.jpeg)
+
+![VisuDocs Dashboard](./documentation/images/dashboard.jpeg)
+
+[![YouTube](http://i.ytimg.com/vi/pAY6s_Z3O5Q/hqdefault.jpg)](https://www.youtube.com/watch?v=pAY6s_Z3O5Q)
+
 # Tech Stack
 
 *Frontend:* Built with React and TailwindCSS. Uses the [Monaco code editor](https://github.com/microsoft/monaco-editor) for the main editor functionality, and [Piston](https://github.com/engineer-man/piston) to run the code itself. 
@@ -16,17 +22,6 @@ A collaborative, real-time code editor with support for multi-user editing. Simi
 *Backend:* Built with Express and Node.js, using Socket.io to handle multi-user and chat functionality. The code data for the projects themselves are stored in MongoDB, with Redis used as an in-memory cache to sync code and messages effectively.
 
 *Auth/Security:* Uses MongoDB. Supports sign-in/sign-up with email or with Google via Firebase, secured with JSON Web Tokens (JWT) and cookie-based sessions.
-
-
-### UI Screenshots
-
-![VisuDocs Editor](./documentation/images/editor.jpeg)
-
-![VisuDocs Dashboard](./documentation/images/dashboard.jpeg)
-
-### Video Demo
-
-![](https://youtu.be/pAY6s_Z3O5Q)
 
 
 # Usage
