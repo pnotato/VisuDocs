@@ -68,5 +68,8 @@ $ nodemon server.js --log
 [server.js] Redis client initialized :)
 [server.js] Server running on port 3000 :)
 ```
+# Notes
 
+- The editor colour scheme will appear slightly off on HDR-enabled displays. This is due to how the monaco theming is configured and will hopefully be fixed soon.
+- Demo coming soon!
 
