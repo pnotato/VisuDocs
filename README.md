@@ -57,7 +57,7 @@ VITE_FIREBASE_KEY=<firebase api key>
 Start the frontend by running ```npm run dev``` and backend with ```node server.js```. The app should start running on [http://localhost:5173/](http://localhost:5173/)
 
 You can also enable server updates by running the ```--log``` flag when running ```server.js```
-```
+```shell
 $ nodemon server.js --log
 [nodemon] starting `node server.js --log`
 
