@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import express from 'express';
-import authRoutes from "./database/Routes/auth.js";
-import projectRoutes from "./database/Routes/projects.js";
-import userRoutes from "./database/Routes/users.js";
+import authRoutes from "./Routes/auth.js";
+import projectRoutes from "./Routes/projects.js";
+import userRoutes from "./Routes/users.js";
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import 'dotenv/config'
@@ -10,7 +10,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import { Server as SocketIOServer } from "socket.io";
 import { createClient } from 'redis';
-import Project from './database/Models/Project.js';
+import Project from './Models/Project.js';
 
 // Since this is a smaller scope, dictionaries are used for temporary code storage in the server
 // Basically, when a new user joins the websocket room, the data will be  saved into these dictionaries.
