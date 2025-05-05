@@ -1,6 +1,6 @@
 <h1 align="center">
     <a href="https://github.com/pnotato/VisuDocs">
-        <img src="./public/icons/icon.png" valign="middle" width="58" height="58" alt="engineer-man piston" />
+        <img src="./client/public/icons/icon.png" valign="middle" width="58" height="58" alt="VisuDocs" />
     </a>
     <span valign="middle">
         VisuDocs
