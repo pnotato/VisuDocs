@@ -40,7 +40,9 @@ if (verbose) {
 }
 
 
-const redisClient = createClient();
+const redisClient = createClient({
+    url: process.env.REDIS_URL
+});
 
 
 // Redis
@@ -196,7 +198,7 @@ async function websockets() {
 // Express
 
 app.get('/', (req, res) => {
-    res.send('Hello, world!');
+    res.send('VisuDocs is running!');
 });
 
 app.use(cookieParser())
