@@ -26,7 +26,7 @@ A collaborative, real-time code editor with support for multi-user editing. Simi
 
 ### Video Demo
 
-![](./documentation/demo-video.mp4)
+[View on YouTube!](https://www.youtube.com/watch?v=pAY6s_Z3O5Q)
 
 # Usage
 
